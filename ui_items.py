@@ -46,7 +46,8 @@ class Button:
 
 class RectangleHoverButton(Button):
     """ A rectangular button which changes colour on mouseover, for use in menus and other interfaces. """
-    def __init__(self, text, width, height, x, y, color, hover_color, text_size=35):
+    def __init__(self, text, width, height, x, y, color=constants.LIGHT_GREY,
+                 hover_color=constants.DARK_GREY, text_size=35):
         super().__init__(text, width, height, x, y, text_size)
         self.color = color
         self.hover_color = hover_color
