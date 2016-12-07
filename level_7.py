@@ -42,7 +42,7 @@ class LevelSeven(game_scene.GameScene):
         scene_tools.add_falling_object(self.timer, 1200, gameplay_items.Alien, self.aliens)
 
         if self.timer == 5000:
-            self.next_scene = level_8.LevelEight(self.score, self.lives, self.health)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.score, self.lives, self.health, level_8.LevelEight)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")

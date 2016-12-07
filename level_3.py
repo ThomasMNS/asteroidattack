@@ -34,7 +34,7 @@ class LevelThree(game_scene.GameScene):
         scene_tools.add_falling_object(self.timer, 600, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids)
 
         if self.timer == 5000:
-            self.next_scene = level_4.LevelFour(self.score, self.lives, self.health)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.score, self.lives, self.health, level_4.LevelFour)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")
