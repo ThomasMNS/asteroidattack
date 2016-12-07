@@ -5,7 +5,7 @@ and runs the main game loop. """
 # Thomas Burke - thomasmns.com
 # 14/11/2016
 
-# Test
+# Test 2
 
 # Importing required modules
 # Pygame
