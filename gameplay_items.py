@@ -44,6 +44,12 @@ class PlayerShip(pygame.sprite.Sprite):
         self.shield = Shield(self)
         sprite_group.add(self.shield)
 
+    def update_appearance(self, image):
+        self.image = pygame.image.load(image).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+
+
 
 class Shield(pygame.sprite.Sprite):
     """ Appears around a PlayerShip() instance. """
