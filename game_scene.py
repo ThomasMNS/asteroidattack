@@ -112,6 +112,9 @@ class GameScene(generic_scene.GenericScene):
         self.star_sound = pygame.mixer.Sound('music/coin.wav')
         self.star_sound.set_volume(0.2)
 
+        # Level ending beep
+        self.ending_beep = pygame.mixer.Sound('music/zap.ogg')
+
     def handle_events(self, events):
         for event in events:
             # Ship keyboard controls
@@ -307,6 +310,10 @@ class GameScene(generic_scene.GenericScene):
             scene_tools.death_scene_reset([self.asteroids, self.pups, self.collectible_stars], self.player)
             self.health = 100
             self.alert_played = False
+
+        # Level ending beeps
+        if self.timer == 4700 or self.timer == 4760 or self.timer == 4820 or self.timer == 4880 or self.timer == 4940:
+            self.ending_beep.play()
 
         self.all_sprites.update()
         self.lasers.update()
