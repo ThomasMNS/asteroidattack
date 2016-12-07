@@ -12,6 +12,7 @@ and runs the main game loop. """
 import pygame
 # Game modules
 import ui_scenes
+import customisation_scene
 
 
 def main():
@@ -42,6 +43,8 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     active_scene.next_scene = None
+                elif event.key == pygame.K_c:
+                    active_scene.next_scene = customisation_scene.CustomisationScene()
                 else:
                     filtered_events.append(event)
             else:
