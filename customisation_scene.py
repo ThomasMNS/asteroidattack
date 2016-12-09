@@ -16,7 +16,7 @@ class CustomisationScene(generic_scene.GenericScene):
         # Place a player ship in the middle of the scene
         self.ship = gameplay_items.PlayerShip()
         self.ship.rect.x = 512 - (self.ship.rect.width / 2)
-        self.ship.rect.y = 500
+        self.ship.rect.y = 480
         self.ship_group = pygame.sprite.Group(self.ship)
 
         # Buttons
@@ -26,17 +26,21 @@ class CustomisationScene(generic_scene.GenericScene):
         self.galaxy_button = ui_items.RectangleHoverButton("Galaxy", 300, 90, 682, 90)
 
         # Color
-        self.blue_button = ui_items.RectangleHoverButton("", 90, 90, 302, 270, constants.SHIP_BLUE,
+        self.blue_button = ui_items.RectangleHoverButton("", 90, 90, 302, 310, constants.SHIP_BLUE,
                                                          constants.SHIP_BLUE)
-        self.green_button = ui_items.RectangleHoverButton("", 90, 90, 412, 270, constants.SHIP_GREEN,
+        self.green_button = ui_items.RectangleHoverButton("", 90, 90, 412, 310, constants.SHIP_GREEN,
                                                           constants.SHIP_GREEN)
-        self.orange_button = ui_items.RectangleHoverButton("", 90, 90, 522, 270, constants.SHIP_ORANGE,
+        self.orange_button = ui_items.RectangleHoverButton("", 90, 90, 522, 310, constants.SHIP_ORANGE,
                                                            constants.SHIP_ORANGE)
-        self.red_button = ui_items.RectangleHoverButton("", 90, 90, 632, 270, constants.SHIP_RED,
+        self.red_button = ui_items.RectangleHoverButton("", 90, 90, 632, 310, constants.SHIP_RED,
                                                         constants.SHIP_RED)
 
+        # Start
+        self.start_button = ui_items.RectangleHoverButton("Start", 300, 90, 362, 640)
+
         self.buttons = [self.nova_button, self.nebula_button, self.galaxy_button,
-                        self.blue_button, self.green_button, self.orange_button, self.red_button]
+                        self.blue_button, self.green_button, self.orange_button, self.red_button,
+                        self.start_button]
 
         # Text
         font = pygame.font.Font(None, 45)
@@ -46,7 +50,7 @@ class CustomisationScene(generic_scene.GenericScene):
 
         self.color_text = font.render("Ship colour", True, constants.WHITE)
         self.color_text_x = (1024 / 2) - (self.color_text.get_rect().width / 2)
-        self.color_text_y = 180 + (90 / 2) - (self.color_text.get_rect().height / 2)
+        self.color_text_y = 220 + (90 / 2) - (self.color_text.get_rect().height / 2)
 
         # Customisation selections
         self.ship_class = "2"
@@ -79,6 +83,9 @@ class CustomisationScene(generic_scene.GenericScene):
             elif event.type == pygame.MOUSEBUTTONDOWN and self.red_button.mouse_over is True:
                 self.ship_color = "red"
                 self.ship_changed = True
+            # Start
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.start_button.mouse_over is True:
+                self.next_scene = None
 
     def update(self):
         for button in self.buttons:
