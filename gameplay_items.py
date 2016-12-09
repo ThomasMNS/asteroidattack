@@ -46,7 +46,11 @@ class PlayerShip(pygame.sprite.Sprite):
 
     def update_appearance(self, image):
         self.image = pygame.image.load(image).convert_alpha()
+        x = self.rect.x
+        y = self.rect.y
         self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
         self.mask = pygame.mask.from_surface(self.image)
 
 
