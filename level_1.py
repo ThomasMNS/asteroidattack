@@ -12,10 +12,11 @@ import scene_tools
 
 class LevelOne(game_scene.GameScene):
     """ Class for the first game level. """
-    def __init__(self):
+    def __init__(self, ship):
         self.score = 0
         self.lives = 3
         self.health = 100
+        self.player = ship
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
 
         # Initial Asteroids
@@ -30,7 +31,8 @@ class LevelOne(game_scene.GameScene):
         scene_tools.add_falling_object(self.timer, 240, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.score, self.lives, self.health, level_2.LevelTwo)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.ship, self.score, self.lives, self.health,
+                                                           level_2.LevelTwo)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")

@@ -7,12 +7,16 @@ import generic_scene
 import constants
 import gameplay_items
 import ui_items
+import ui_scenes
 
 
 class CustomisationScene(generic_scene.GenericScene):
     """ Class for a scene allowing players to change the appearance of their ship. """
-    def __init__(self):
+    def __init__(self, next_level):
         super().__init__()
+
+        self.next_level = next_level
+
         # Place a player ship in the middle of the scene
         self.ship = gameplay_items.PlayerShip()
         self.ship.rect.x = 512 - (self.ship.rect.width / 2)
@@ -85,7 +89,10 @@ class CustomisationScene(generic_scene.GenericScene):
                 self.ship_changed = True
             # Start
             elif event.type == pygame.MOUSEBUTTONDOWN and self.start_button.mouse_over is True:
-                self.next_scene = None
+                if self.next_level == "campaign":
+                    self.next_scene = ui_scenes.GetReadyScene("campaign", self.ship)
+                elif self.next_level == "training":
+                    self.next_scene = ui_scenes.TrainingSetupScene(self.ship)
 
     def update(self):
         for button in self.buttons:

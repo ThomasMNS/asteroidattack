@@ -12,6 +12,7 @@ import generic_scene
 import scene_tools
 import level_1
 import training_scene
+import customisation_scene
 # Third party Pygame modules
 import eztext
 
@@ -194,9 +195,9 @@ class GameModeSelectionScene(generic_scene.GenericScene):
             # Checking for clicks on buttons
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.campaign_button.mouse_over is True:
-                    self.next_scene = GetReadyScene("campaign")
+                    self.next_scene = customisation_scene.CustomisationScene("campaign")
                 elif self.training_button.mouse_over is True:
-                    self.next_scene = TrainingSetupScene()
+                    self.next_scene = customisation_scene.CustomisationScene("training")
                 elif self.return_button.mouse_over is True:
                     self.next_scene = TitleScene()
 
@@ -221,8 +222,9 @@ class GameModeSelectionScene(generic_scene.GenericScene):
 class TrainingSetupScene(generic_scene.GenericScene):
     """ A class for a screen that contains various UI components to change variables such as the number of
     asteroids, powerups etc. These are then passed to a training scene. """
-    def __init__(self):
+    def __init__(self, ship):
         super().__init__()
+        self.ship = ship
         self.start_button = ui_items.RectangleHoverButton("Start", 300, 90, 202, 640, constants.LIGHT_GREY,
                                                            constants.DARK_GREY)
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 202 + 20 + 300, 640, constants.DARKER_RED,
@@ -303,7 +305,7 @@ class TrainingSetupScene(generic_scene.GenericScene):
                                         self.alien_time_selector.value,
                                         self.powerups_toggle.value, self.lives_selector.value,
                                         self.health_selector.value]
-                    self.next_scene = GetReadyScene("training", training_choices)
+                    self.next_scene = GetReadyScene("training", self.ship, training_choices)
 
     def update(self):
         for button in self.buttons:
@@ -419,10 +421,11 @@ class AcknowledgementsScene(generic_scene.GenericScene):
 
 class GetReadyScene(generic_scene.GenericScene):
     """ Displayed before Level 1 begins to give the player a moment to prepare."""
-    def __init__(self, mode, choices=None):
+    def __init__(self, mode, ship, choices=None):
+        super().__init__()
         self.mode = mode
         self.choices = choices
-        super().__init__()
+        self.ship = ship
 
         self.font = pygame.font.Font(None, 190)
         self.get_ready_text = "Get ready!"
@@ -437,9 +440,9 @@ class GetReadyScene(generic_scene.GenericScene):
         self.timer += 1
         if self.timer > 240:
             if self.mode == "campaign":
-                self.next_scene = level_1.LevelOne()
+                self.next_scene = level_1.LevelOne(self.ship)
             elif self.mode == "training":
-                self.next_scene = training_scene.TrainingScene(self.choices)
+                self.next_scene = training_scene.TrainingScene(self.ship, self.choices)
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)

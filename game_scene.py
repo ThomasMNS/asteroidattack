@@ -68,7 +68,6 @@ class GameScene(generic_scene.GenericScene):
         self.aliens = pygame.sprite.Group()
 
         # Create a player ship object, and place near the bottom of the screen
-        self.player = gameplay_items.PlayerShip()
         self.player.update_pos(50, 600)
         self.all_sprites.add(self.player)
         # Creating a container for lasers
