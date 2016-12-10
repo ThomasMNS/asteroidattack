@@ -31,7 +31,7 @@ class LevelOne(game_scene.GameScene):
         scene_tools.add_falling_object(self.timer, 240, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.ship, self.score, self.lives, self.health,
+            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.score, self.lives, self.health,
                                                            level_2.LevelTwo)
 
         if self.lives == 0:
@@ -41,8 +41,5 @@ class LevelOne(game_scene.GameScene):
         super().draw(screen)
         self.all_sprites.draw(screen)
         self.collectible_stars.draw(screen)
-        for alien in self.aliens:
-            alien.draw_lasers(screen)
-        self.aliens.draw(screen)
         # Drawing UI text needs to be done after everything else so that it is on top
         game_scene.GameScene.draw_text(self, screen)
