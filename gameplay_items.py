@@ -87,6 +87,18 @@ class Laser(pygame.sprite.Sprite):
             self.kill()
 
 
+class Asteroid(pygame.sprite.Sprite):
+    def __init__(self):
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self):
+        self.rect.y += self.y_speed
+        if self.rect.y > 768:
+            self.rect.y = random.randrange(-2000, -200)
+            self.rect.x = random.randrange(0, 1024)
+
+
 class BrownAsteroid(pygame.sprite.Sprite):
     """ Large sprite that moves slowly down the screen. """
     def __init__(self):
@@ -157,8 +169,56 @@ class MedAsteroid(pygame.sprite.Sprite):
 
 class FragmentingAsteroid(pygame.sprite.Sprite):
     """ A large asteroid. When hit, it breaks into multiple smaller asteroids. """
+    def __init__(self, game_scene):
+        super().__init__()
+        self.image = pygame.image.load('assets/meteor_dark_brown_big_1.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.y_speed = 4
+
+        self.game_scene = game_scene
+
+    def update(self):
+        self.rect.y += self.y_speed
+        if self.rect.y > 768:
+            self.rect.y = random.randrange(-2000, -200)
+            self.rect.x = random.randrange(0, 1024)
+
+        for laser in self.game_scene.lasers:
+            if pygame.sprite.collide_mask(self, laser):
+                laser.kill()
+                self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+                self.game_scene.explosion.play()
+                x = self.rect.x
+                y = self.rect.y
+                self.kill()
+                self.game_scene.score += 10
+                ast1 = FragmentedAsteroid()
+                ast1.rect.x = x + 40
+                ast1.rect.y = y
+                ast2 = FragmentedAsteroid()
+                ast2.rect.x = x - 40
+                ast2.rect.y = y
+
+                self.game_scene.frag_asteroids.add(ast1)
+                self.game_scene.frag_asteroids.add(ast2)
+
+
+class FragmentedAsteroid(pygame.sprite.Sprite):
+    """ A smaller asteroid spawned when a fragmenting asteroid is destroyed. """
     def __init__(self):
         super().__init__()
+        self.image = pygame.image.load('assets/meteor_brown_med_1.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.y_speed = 8
+
+    def update(self):
+        self.rect.y += self.y_speed
+        if self.rect.y > 768:
+            self.rect.y = random.randrange(-2000, -200)
+            self.rect.x = random.randrange(0, 1024)
 
 
 class Alien(pygame.sprite.Sprite):
