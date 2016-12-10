@@ -155,6 +155,12 @@ class MedAsteroid(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, 1024)
 
 
+class FragmentingAsteroid(pygame.sprite.Sprite):
+    """ A large asteroid. When hit, it breaks into multiple smaller asteroids. """
+    def __init__(self):
+        super().__init__()
+
+
 class Alien(pygame.sprite.Sprite):
     """ Sprite that zigzags down the screen, ocasionally shooting laser sprites. """
     def __init__(self):
