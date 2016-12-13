@@ -18,3 +18,8 @@ A simple Pygame learning project.
 # Installation notes
 
 Requires Python 3 and Pygame. Creates and edits a highscores file (asteroid-attack-program-highscores.p) in the same folder as asteroid_attack.py so keep it in it's own directory to prevent it from interfering with anything else.   
+
+# Change log
+
+* 09/12/2016 - Added simple ship appearance customisation options that work in both game modes. 
+* 07/12/2016 - Added sound effects to indicate the player is coming to the end of a level. "Level complete" screens are again being correctly displayed after each level. 
