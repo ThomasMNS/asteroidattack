@@ -8,6 +8,7 @@ import constants
 import gameplay_items
 import ui_items
 import ui_scenes
+import test_level
 
 
 class CustomisationScene(generic_scene.GenericScene):
@@ -93,6 +94,10 @@ class CustomisationScene(generic_scene.GenericScene):
                     self.next_scene = ui_scenes.GetReadyScene("campaign", self.ship)
                 elif self.next_level == "training":
                     self.next_scene = ui_scenes.TrainingSetupScene(self.ship)
+            # Testing
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_t:
+                    self.next_scene = test_level.TestLevel(self.ship)
 
     def update(self):
         for button in self.buttons:

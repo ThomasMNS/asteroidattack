@@ -22,10 +22,13 @@ def multiline_text(text_list, x, y, screen, color, size):
 
 
 def initial_falling_objects(count, obj_class, container_1, container_2=None, container_3=None,
-                            min_y=-2000, max_y=-200):
+                            min_y=-2000, max_y=-200, argument=None):
     """ Creates a given number of existing sprite objects, and adds them to sprite groups. """
     for i in range(count):
-        funcobj = obj_class()
+        if argument is None:
+            funcobj = obj_class()
+        else:
+            funcobj = obj_class(argument)
         funcobj.rect.x = random.randrange(0, 1024)
         funcobj.rect.y = random.randrange(min_y, max_y)
         container_1.add(funcobj)
@@ -36,10 +39,13 @@ def initial_falling_objects(count, obj_class, container_1, container_2=None, con
 
 
 def add_falling_object(timer, time, obj_class, container_1, container_2=None,
-                       container_3=None, min_x=-2000, max_x = -200):
+                       container_3=None, min_x=-2000, max_x = -200, argument=None):
     """ Creates a given existing sprite every x time and adds it to sprite groups. """
     if timer % time == 0:
-        funcobj = obj_class()
+        if argument is None:
+            funcobj = obj_class()
+        else:
+            funcobj = obj_class(argument)
         funcobj.rect.x = random.randrange(0, 1024)
         funcobj.rect.y = random.randrange(min_x, max_x)
         container_1.add(funcobj)

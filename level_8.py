@@ -14,6 +14,10 @@ class LevelEight(game_scene.GameScene):
     def __init__(self, ship, score, lives, health):
         self.player = ship
         super().__init__(pygame.image.load('assets/purple_stars.png').convert())
+        self.score = score
+        self.lives = lives
+        self.health = health
+
         # Fill it with brown asteroids
         scene_tools.initial_falling_objects(3, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
         # Fill it with grey asteroids
@@ -22,10 +26,8 @@ class LevelEight(game_scene.GameScene):
         scene_tools.initial_falling_objects(2, gameplay_items.MedAsteroid, self.all_sprites, self.asteroids)
         # Fill it with aliens
         scene_tools.initial_falling_objects(1, gameplay_items.Alien, self.aliens)
-
-        self.score = score
-        self.lives = lives
-        self.health = health
+        # Fill with fragmenting asteroids
+        scene_tools.initial_falling_objects(1, gameplay_items.FragmentingAsteroid, self.all_sprites, argument=self)
 
     def handle_events(self, events):
         super().handle_events(events)
@@ -40,6 +42,9 @@ class LevelEight(game_scene.GameScene):
         scene_tools.add_falling_object(self.timer, 600, gameplay_items.MedAsteroid, self.all_sprites, self.asteroids)
         # Add a new alien every 15 seconds
         scene_tools.add_falling_object(self.timer, 900, gameplay_items.Alien, self.aliens)
+        # Add a new fragmenting asteroid every 20 seconds
+        scene_tools.add_falling_object(self.timer, 1200, gameplay_items.FragmentingAsteroid, self.all_sprites,
+                                       argument=self)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")
