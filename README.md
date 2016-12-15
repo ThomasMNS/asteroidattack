@@ -21,5 +21,6 @@ Requires Python 3 and Pygame. Creates and edits a highscores file (asteroid-atta
 
 # Change log
 
+* 13/12/2016 - Added fragmenting asteroids. These can be found in level 8.
 * 09/12/2016 - Added simple ship appearance customisation options that work in both game modes. 
 * 07/12/2016 - Added sound effects to indicate the player is coming to the end of a level. "Level complete" screens are again being correctly displayed after each level. 
