@@ -367,5 +367,9 @@ class GameScene(generic_scene.GenericScene):
         lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
         screen.blit(lasers_render, (10, 740))
 
-    def laser_collision_detection(self):
-        pass
+    def laser_collision_detection(self, enemies, laser):
+        for enemy in enemies:
+            if pygame.sprite.collide_mask(enemy, laser):
+                laser.kill()
+                self.explosion.play()
+                self.all_sprites.add(gameplay_items.Explosion(enemy.rect.x, enemy.rect.y, self.images))
