@@ -366,3 +366,6 @@ class GameScene(generic_scene.GenericScene):
         lasers_text = "Laser charges remaining: {0!s}".format(self.player.lasers)
         lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
         screen.blit(lasers_render, (10, 740))
+
+    def laser_collision_detection(self):
+        pass
