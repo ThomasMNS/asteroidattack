@@ -17,10 +17,13 @@ class LevelOne(game_scene.GameScene):
         self.lives = 3
         self.health = 100
         self.player = ship
+        self.player.game_scene = self
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
 
         # Initial Asteroids
         scene_tools.initial_falling_objects(3, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+
+        scene_tools.initial_falling_objects(3, gameplay_items.Alien, self.aliens)
 
     def handle_events(self, events):
         super().handle_events(events)

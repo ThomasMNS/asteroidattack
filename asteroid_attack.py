@@ -8,7 +8,7 @@ and runs the main game loop. """
 # Test 2
 
 # Importing required modules
-# Pygame
+# Pygamessssss
 import pygame
 # Game modules
 import ui_scenes
