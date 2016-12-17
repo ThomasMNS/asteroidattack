@@ -343,6 +343,51 @@ class FragmentedAsteroid(pygame.sprite.Sprite):
         self.kill()
 
 
+class StrongAsteroid(pygame.sprite.Sprite):
+    """ An asteroid that takes several hits to destroy. """
+    def __init__(self, game_scene):
+        super().__init__()
+        self.randnum = random.randrange(1, 5)
+        self.image = pygame.image.load('assets/meteor_purple_big_{0!s}.png'.format(self.randnum)).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.game_scene = game_scene
+        self.y_speed = 2
+        self.score_increase = 30
+        self.health_decrease = 30
+
+        self.health = 3
+
+    def update(self):
+        self.rect.y += self.y_speed
+        if self.rect.y > 768:
+            self.rect.y = random.randrange(-2000, -200)
+            self.rect.x = random.randrange(0, 1024)
+
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.health -= 1
+        if self.health == 2:
+            y = self.rect.y
+            x = self.rect.x
+            self.image = pygame.image.load('assets/meteor_purple_big_{0!s}_damaged_1.png'.format(self.randnum)).convert_alpha()
+            self.rect = self.image.get_rect()
+            self.rect.y = y
+            self.rect.x = x
+            self.mask = pygame.mask.from_surface(self.image)
+        elif self.health == 1:
+            y = self.rect.y
+            x = self.rect.x
+            self.image = pygame.image.load('assets/meteor_purple_big_{0!s}_damaged_2.png'.format(self.randnum)).convert_alpha()
+            self.rect = self.image.get_rect()
+            self.rect.y = y
+            self.rect.x = x
+            self.mask = pygame.mask.from_surface(self.image)
+        elif self.health == 0:
+            self.kill()
+
+
 class Alien(pygame.sprite.Sprite):
     """ Sprite that zigzags down the screen, ocasionally shooting laser sprites. """
     def __init__(self, game_scene):
