@@ -20,7 +20,8 @@ class LevelTwo(game_scene.GameScene):
         self.health = health
 
         # Fill it with brown asteroids
-        scene_tools.initial_falling_objects(6, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.initial_falling_objects(6, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
 
     def handle_events(self, events):
         super().handle_events(events)
@@ -28,10 +29,12 @@ class LevelTwo(game_scene.GameScene):
     def update(self):
         super().update()
         # Add a new brown asteroid every 3 seconds
-        scene_tools.add_falling_object(self.timer, 180, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.add_falling_object(self.timer, 180, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+                                       argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.score, self.lives, self.health, level_3.LevelThree)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.score, self.lives, self.health,
+                                                           level_3.LevelThree)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")

@@ -5,10 +5,8 @@ and runs the main game loop. """
 # Thomas Burke - thomasmns.com
 # 14/11/2016
 
-# Test 2
-
 # Importing required modules
-# Pygamessssss
+# Pygame
 import pygame
 # Game modules
 import ui_scenes

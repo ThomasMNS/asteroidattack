@@ -17,7 +17,7 @@ class GameScene(generic_scene.GenericScene):
     scrolling stars, a player ship, powerups, scores etc. """
     def __init__(self, background_image):
         super().__init__()
-
+        self.player.game_scene = self
         pygame.mouse.set_visible(False)
 
         # Setting up the game stats

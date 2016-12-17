@@ -16,9 +16,11 @@ class LevelFour(game_scene.GameScene):
         self.player = ship
         super().__init__(pygame.image.load('assets/dark_blue_stars.png').convert())
         # Fill it with brown asteroids
-        scene_tools.initial_falling_objects(5, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.initial_falling_objects(5, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
         # Fill it with grey asteroids
-        scene_tools.initial_falling_objects(2, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.initial_falling_objects(2, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
 
         self.score = score
         self.lives = lives
@@ -30,12 +32,15 @@ class LevelFour(game_scene.GameScene):
     def update(self):
         super().update()
         # Add a new brown asteroid every 4 seconds
-        scene_tools.add_falling_object(self.timer, 240, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.add_falling_object(self.timer, 240, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+                                       argument=self)
         # Add a new grey asteroid every 8 seconds
-        scene_tools.add_falling_object(self.timer, 480, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.add_falling_object(self.timer, 480, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids,
+                                       argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.score, self.lives, self.health, level_5.LevelFive)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.player,
+                                                           self.score, self.lives, self.health, level_5.LevelFive)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")

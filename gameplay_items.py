@@ -114,9 +114,9 @@ class PlayerShip(pygame.sprite.Sprite):
         elif self.rect[1] >= (768 - self.rect.height):
             self.update_pos(self.rect.x, 768 - self.rect.height)
 
-
     def create_shield(self, sprite_group):
         self.shield = Shield(self)
+        self.shield.update_pos(self)
         sprite_group.add(self.shield)
 
     def update_appearance(self, image):
@@ -129,20 +129,17 @@ class PlayerShip(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
     def collision_detection(self, enemies):
-        if self.shield is None:
-            for enemy in enemies:
+        for enemy in enemies:
+            if self.shield is None:
                 if pygame.sprite.collide_mask(enemy, self):
-                    enemy.kill()
-                    self.game_scene.all_sprites.add(Explosion(enemy.rect.x, enemy.rect.y, self.game_scene.images))
+                    enemy.collision()
                     if self.game_scene.health - enemy.health_decrease < 20 and self.alert_played is False:
                         self.alarm.play()
                         self.alert_played = True
                     self.game_scene.health -= enemy.health_decrease
-        elif self.shield is not None:
-            for enemy in enemies:
+            elif self.shield is not None:
                 if pygame.sprite.collide_mask(enemy, self.shield):
-                    enemy.kill()
-                    self.game_scene.all_sprites.add(Explosion(enemy.rect.x, enemy.rect.y, self.game_scene.images))
+                    enemy.collision()
                     self.shield.kill()
                     self.shield = None
 
@@ -186,15 +183,15 @@ class Laser(pygame.sprite.Sprite):
         for enemy in enemies:
             if pygame.sprite.collide_mask(enemy, self):
                 self.kill()
-                self.game_scene.all_sprites.add(Explosion(enemy.rect.x, enemy.rect.y, self.game_scene.images))
-                enemy.kill()
+                enemy.collision()
                 self.game_scene.score += enemy.score_increase
 
 
 class BrownAsteroid(pygame.sprite.Sprite):
     """ Large sprite that moves slowly down the screen. """
-    def __init__(self):
+    def __init__(self, game_scene):
         super().__init__()
+        self.game_scene = game_scene
         randnum = random.randrange(0, 4)
         if randnum == 0:
             self.image = pygame.image.load('assets/meteor_brown_big_1.png').convert_alpha()
@@ -217,11 +214,16 @@ class BrownAsteroid(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-2000, -200)
             self.rect.x = random.randrange(0, 1024)
 
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.kill()
+
 
 class GreyAsteroid(pygame.sprite.Sprite):
     """ Large sprite that moves down the screen at med speed. """
-    def __init__(self):
+    def __init__(self, game_scene):
         super().__init__()
+        self.game_scene = game_scene
         randnum = random.randrange(0, 4)
         if randnum == 0:
             self.image = pygame.image.load('assets/meteor_grey_big_1.png').convert_alpha()
@@ -244,11 +246,16 @@ class GreyAsteroid(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-2000, -200)
             self.rect.x = random.randrange(0, 1024)
 
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.kill()
+
 
 class MedAsteroid(pygame.sprite.Sprite):
     """ Small sprite that moves down the screen quickly. """
-    def __init__(self):
+    def __init__(self, game_scene):
         super().__init__()
+        self.game_scene = game_scene
         randnum = random.randrange(0, 2)
         if randnum == 0:
             self.image = pygame.image.load('assets/meteor_brown_med_1.png').convert_alpha()
@@ -266,6 +273,10 @@ class MedAsteroid(pygame.sprite.Sprite):
         if self.rect.y > 768:
             self.rect.y = random.randrange(-2000, -200)
             self.rect.x = random.randrange(0, 1024)
+
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.kill()
 
 
 class FragmentingAsteroid(pygame.sprite.Sprite):
@@ -291,35 +302,9 @@ class FragmentingAsteroid(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-2000, -200)
             self.rect.x = random.randrange(0, 1024)
 
-        for laser in self.game_scene.lasers:
-            if pygame.sprite.collide_mask(self, laser):
-                laser.kill()
-                self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
-                self.game_scene.explosion.play()
-                self.kill()
-                self.game_scene.score += 10
-
-        if self.game_scene.player.shield is None:
-            if pygame.sprite.collide_mask(self, self.game_scene.player):
-                self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
-                self.game_scene.explosion.play()
-                self.kill()
-                self.game_scene.score += 10
-                if self.game_scene.health - 30 < 20 and self.game_scene.alert_played is False:
-                    self.game_scene.alarm.play()
-                    self.game_scene.alert_played = True
-                self.game_scene.health -= 30
-
-        elif self.game_scene.player.shield is not None:
-            if pygame.sprite.collide_mask(self, self.game_scene.player.shield):
-                self.game_scene.player.shield.kill()
-                self.game_scene.player.shield = None
-                self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
-                self.game_scene.explosion.play()
-                self.kill()
-                self.game_scene.score += 10
-
-    def death(self):
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.kill()
         ast1 = FragmentedAsteroid(self.game_scene)
         ast1.rect.x = self.rect.x + (self.rect.width / 2 - ast1.rect.width / 2) + 40
         ast1.rect.y = self.rect.y
@@ -328,7 +313,6 @@ class FragmentingAsteroid(pygame.sprite.Sprite):
         ast2.rect.x = self.rect.x + (self.rect.width / 2 - ast1.rect.width / 2) - 40
         ast2.rect.y = self.rect.y + 30
         self.game_scene.all_sprites.add(ast2)
-
 
 
 class FragmentedAsteroid(pygame.sprite.Sprite):
@@ -354,38 +338,16 @@ class FragmentedAsteroid(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-2000, -200)
             self.rect.x = random.randrange(0, 1024)
 
-        for laser in self.game_scene.lasers:
-            if pygame.sprite.collide_mask(self, laser):
-                laser.kill()
-                self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
-                self.game_scene.explosion.play()
-                self.kill()
-                self.game_scene.score += 10
-
-        if self.game_scene.player.shield is None:
-            if pygame.sprite.collide_mask(self, self.game_scene.player):
-                self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
-                self.game_scene.explosion.play()
-                self.kill()
-                self.game_scene.score += 10
-                if self.game_scene.health - 30 < 20 and self.game_scene.alert_played is False:
-                    self.game_scene.alarm.play()
-                    self.game_scene.alert_played = True
-                self.game_scene.health -= 10
-        elif self.game_scene.player.shield is not None:
-            if pygame.sprite.collide_mask(self, self.game_scene.player):
-                self.game_scene.player.shield.kill()
-                self.game_scene.player.shield = None
-                self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
-                self.game_scene.explosion.play()
-                self.kill()
-                self.game_scene.score += 10
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.kill()
 
 
 class Alien(pygame.sprite.Sprite):
     """ Sprite that zigzags down the screen, ocasionally shooting laser sprites. """
-    def __init__(self):
+    def __init__(self, game_scene):
         super().__init__()
+        self.game_scene = game_scene
         self.speed = 4
         rand_num = random.randrange(0, 4)
         if rand_num == 0:
@@ -443,7 +405,7 @@ class Alien(pygame.sprite.Sprite):
         self.lasers.draw(screen)
 
     def shoot(self):
-        self.lasers.add(AlienLaser(self.rect.x + 45, self.rect.y + 45))
+        self.lasers.add(AlienLaser(self.rect.x + 45, self.rect.y + 45, self.game_scene))
         self.laser_sound.play()
 
     def gen_min_max(self):
@@ -472,11 +434,16 @@ class Alien(pygame.sprite.Sprite):
         self.rect.y = random.randrange(-10000, -200)
         self.rect.x = random.randrange(self.x_min, self.x_max)
 
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.kill()
+
 
 class AlienLaser(pygame.sprite.Sprite):
     """ Sprite that moves down the screen. Used by the Alien class. """
-    def __init__(self, x, y):
+    def __init__(self, x, y, game_scene):
         super().__init__()
+        self.game_scene = game_scene
         self.image = pygame.image.load('assets/laser_green.png')
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
@@ -491,6 +458,10 @@ class AlienLaser(pygame.sprite.Sprite):
         self.rect.y += self.speed
         if self.rect.y > 768:
             self.kill()
+
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.kill()
 
 
 class Explosion(pygame.sprite.Sprite):

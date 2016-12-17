@@ -16,13 +16,16 @@ class LevelSeven(game_scene.GameScene):
         self.player = ship
         super().__init__(pygame.image.load('assets/purple_stars.png').convert())
         # Fill it with brown asteroids
-        scene_tools.initial_falling_objects(3, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.initial_falling_objects(3, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
         # Fill it with grey asteroids
-        scene_tools.initial_falling_objects(2, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.initial_falling_objects(2, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
         # Fill it with small asteroids
-        scene_tools.initial_falling_objects(2, gameplay_items.MedAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.initial_falling_objects(2, gameplay_items.MedAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
         # Fill it with aliens
-        scene_tools.initial_falling_objects(1, gameplay_items.Alien, self.aliens)
+        scene_tools.initial_falling_objects(1, gameplay_items.Alien, self.aliens, argument=self)
 
         self.score = score
         self.lives = lives
@@ -34,16 +37,20 @@ class LevelSeven(game_scene.GameScene):
     def update(self):
         super().update()
         # Add a new brown asteroid every 10 seconds
-        scene_tools.add_falling_object(self.timer, 600, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.add_falling_object(self.timer, 600, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+                                       argument=self)
         # Add a new grey asteroid every 10 seconds
-        scene_tools.add_falling_object(self.timer, 600, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.add_falling_object(self.timer, 600, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids,
+                                       argument=self)
         # Add a new small asteroid every 15 seconds
-        scene_tools.add_falling_object(self.timer, 900, gameplay_items.MedAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.add_falling_object(self.timer, 900, gameplay_items.MedAsteroid, self.all_sprites, self.asteroids,
+                                       argument=self)
         # Add a new alien every 20 seconds
-        scene_tools.add_falling_object(self.timer, 1200, gameplay_items.Alien, self.aliens)
+        scene_tools.add_falling_object(self.timer, 1200, gameplay_items.Alien, self.aliens, argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.score, self.lives, self.health, level_8.LevelEight)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.score, self.lives, self.health,
+                                                           level_8.LevelEight)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")
