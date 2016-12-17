@@ -310,10 +310,12 @@ class FragmentingAsteroid(pygame.sprite.Sprite):
         ast1.rect.x = self.rect.x + (self.rect.width / 2 - ast1.rect.width / 2) + 40
         ast1.rect.y = self.rect.y
         self.game_scene.all_sprites.add(ast1)
+        self.game_scene.asteroids.add(ast1)
         ast2 = FragmentedAsteroid(self.game_scene)
         ast2.rect.x = self.rect.x + (self.rect.width / 2 - ast1.rect.width / 2) - 40
         ast2.rect.y = self.rect.y + 30
         self.game_scene.all_sprites.add(ast2)
+        self.game_scene.asteroids.add(ast2)
 
 
 class FragmentedAsteroid(pygame.sprite.Sprite):
