@@ -148,7 +148,7 @@ class Shield(pygame.sprite.Sprite):
     """ Appears around a PlayerShip() instance. """
     def __init__(self, ship):
         super().__init__()
-        self.image = pygame.image.load('assets/shield.png')
+        self.image = pygame.image.load('assets/shield.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image, 10)
 
@@ -162,7 +162,7 @@ class Laser(pygame.sprite.Sprite):
     def __init__(self, game_scene, x, y):
         super().__init__()
         self.game_scene = game_scene
-        self.image = pygame.image.load('assets/laser_red.png')
+        self.image = pygame.image.load('assets/laser_red.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.speed = -7
@@ -283,7 +283,8 @@ class FragmentingAsteroid(pygame.sprite.Sprite):
     """ A large asteroid. When hit, it breaks into multiple smaller asteroids. """
     def __init__(self, game_scene):
         super().__init__()
-        self.image = pygame.image.load('assets/meteor_dark_brown_big_1.png').convert_alpha()
+        randnum = random.randrange(1, 5)
+        self.image = pygame.image.load('assets/meteor_dark_brown_big_{0!s}.png'.format(randnum)).convert_alpha()
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.y = random.randrange(-2000, -200)
@@ -396,13 +397,13 @@ class Alien(pygame.sprite.Sprite):
         self.speed = 4
         rand_num = random.randrange(0, 4)
         if rand_num == 0:
-            self.image = pygame.image.load('assets/alien_red.png')
+            self.image = pygame.image.load('assets/alien_red.png').convert_alpha()
         elif rand_num == 1:
-            self.image = pygame.image.load('assets/alien_blue.png')
+            self.image = pygame.image.load('assets/alien_blue.png').convert_alpha()
         elif rand_num == 2:
-            self.image = pygame.image.load('assets/alien_yellow.png')
+            self.image = pygame.image.load('assets/alien_yellow.png').convert_alpha()
         else:
-            self.image = pygame.image.load('assets/alien_green.png')
+            self.image = pygame.image.load('assets/alien_green.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -489,7 +490,7 @@ class AlienLaser(pygame.sprite.Sprite):
     def __init__(self, x, y, game_scene):
         super().__init__()
         self.game_scene = game_scene
-        self.image = pygame.image.load('assets/laser_green.png')
+        self.image = pygame.image.load('assets/laser_green.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
 
