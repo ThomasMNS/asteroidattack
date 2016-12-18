@@ -13,10 +13,11 @@ import test_level
 
 class CustomisationScene(generic_scene.GenericScene):
     """ Class for a scene allowing players to change the appearance of their ship. """
-    def __init__(self, next_level):
+    def __init__(self, next_level, player_count):
         super().__init__()
 
         self.next_level = next_level
+        self.player_count = player_count
 
         # Place a player ship in the middle of the scene
         self.ship = gameplay_items.PlayerShip()
@@ -90,10 +91,11 @@ class CustomisationScene(generic_scene.GenericScene):
                 self.ship_changed = True
             # Start
             elif event.type == pygame.MOUSEBUTTONDOWN and self.start_button.mouse_over is True:
-                if self.next_level == "campaign":
-                    self.next_scene = ui_scenes.GetReadyScene("campaign", self.ship)
-                elif self.next_level == "training":
-                    self.next_scene = ui_scenes.TrainingSetupScene(self.ship)
+                if self.player_count == 1:
+                    if self.next_level == "campaign":
+                        self.next_scene = ui_scenes.GetReadyScene("campaign", self.ship)
+                    elif self.next_level == "training":
+                        self.next_scene = ui_scenes.TrainingSetupScene(self.ship)
             # Testing
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:

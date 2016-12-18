@@ -195,7 +195,7 @@ class GameModeSelectionScene(generic_scene.GenericScene):
             # Checking for clicks on buttons
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.campaign_button.mouse_over is True:
-                    self.next_scene = customisation_scene.CustomisationScene("campaign")
+                    self.next_scene = PlayerNumberScene()
                 elif self.training_button.mouse_over is True:
                     self.next_scene = customisation_scene.CustomisationScene("training")
                 elif self.return_button.mouse_over is True:
@@ -217,6 +217,33 @@ class GameModeSelectionScene(generic_scene.GenericScene):
 
         scene_tools.multiline_text(["Test your skills by creating", "your own customised",
                                                          "training simulation"], 665, 385, screen, constants.WHITE, 30)
+
+
+class PlayerNumberScene(generic_scene.GenericScene):
+    """ A class for a screen with buttons allowing the player to select single or multi-player mode. """
+    def __init__(self):
+        super().__init__()
+        self.single_button = ui_items.RectangleHoverButton("One Player", 300, 90, 362, 400)
+        self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500)
+        self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 600)
+        self.buttons = [self.single_button, self.multi_button, self.return_button]
+
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN and self.single_button.mouse_over is True:
+                self.next_scene = customisation_scene.CustomisationScene("campaign", 1)
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
+                self.next_scene = GameModeSelectionScene()
+
+
+    def update(self):
+        for button in self.buttons:
+            button.mouse_on_button(pygame.mouse.get_pos())
+
+    def draw(self, screen):
+        screen.fill(constants.DARKER_GREY)
+        for button in self.buttons:
+            button.draw_button(screen)
 
 
 class TrainingSetupScene(generic_scene.GenericScene):
