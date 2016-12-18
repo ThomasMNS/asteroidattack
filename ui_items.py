@@ -51,7 +51,7 @@ class RectangleHoverButton(Button):
         super().__init__(text, width, height, x, y, text_size)
         self.color = color
         self.hover_color = hover_color
-        self.sound = pygame.mixer.Sound('music/button.wav')
+        self.sound = pygame.mixer.Sound('music/button.ogg')
         self.sound.set_volume(0.1)
         self.sound_played = False
 
