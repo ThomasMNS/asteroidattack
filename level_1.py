@@ -17,18 +17,21 @@ class LevelOne(game_scene.GameScene):
         self.lives = 3
         self.health = 100
         self.player = ship
+        self.player.game_scene = self
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
 
         # Initial Asteroids
-        scene_tools.initial_falling_objects(3, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+        scene_tools.initial_falling_objects(1, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
 
     def handle_events(self, events):
         super().handle_events(events)
 
     def update(self):
         super().update()
-        # Add a new asteroid every 4 seconds
-        scene_tools.add_falling_object(self.timer, 240, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids)
+        # Add a new asteroid every 8 seconds
+        scene_tools.add_falling_object(self.timer, 480, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+                                       argument=self)
 
         if self.timer == 5000:
             self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.score, self.lives, self.health,

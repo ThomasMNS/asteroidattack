@@ -50,22 +50,22 @@ class TrainingScene(game_scene.GameScene):
         # Create brown asteroids if the option is selected
         if self.brown_asteroids_toggle == 0:
             scene_tools.initial_falling_objects(self.brown_asteroid_count, gameplay_items.BrownAsteroid,
-                                                self.all_sprites, self.asteroids)
+                                                self.all_sprites, self.asteroids, argument=self)
 
         # Create grey asteroids if the option is selected
         if self.grey_asteroids_toggle == 0:
             scene_tools.initial_falling_objects(self.grey_asteroid_count, gameplay_items.GreyAsteroid,
-                                                self.all_sprites, self.asteroids)
+                                                self.all_sprites, self.asteroids, argument=self)
 
         # Create small asteroids if the option is selected
         if self.small_asteroids_toggle == 0:
             scene_tools.initial_falling_objects(self.small_asteroid_count, gameplay_items.MedAsteroid,
-                                                self.all_sprites, self.asteroids)
+                                                self.all_sprites, self.asteroids, argument=self)
 
         # Create aliens if the option is selected
         if self.alien_toggle == 0:
             scene_tools.initial_falling_objects(self.alien_count, gameplay_items.Alien,
-                                                self.aliens)
+                                                self.aliens, argument=self)
 
         # Delete powerups if option not selected
         if self.powerups_toggle == 1:
@@ -81,22 +81,23 @@ class TrainingScene(game_scene.GameScene):
         # Add new brown asteroids every x seconds if option is selected
         if self.brown_asteroids_toggle == 0:
             scene_tools.add_falling_object(self.timer, self.brown_asteroid_seconds * 60, gameplay_items.BrownAsteroid,
-                                           self.all_sprites, self.asteroids)
+                                           self.all_sprites, self.asteroids, argument=self)
 
         # Add new grey asteroids every x seconds if option is selected
         if self.grey_asteroids_toggle == 0:
             scene_tools.add_falling_object(self.timer, self.grey_asteroid_seconds * 60, gameplay_items.GreyAsteroid,
-                                           self.all_sprites, self.asteroids)
+                                           self.all_sprites, self.asteroids, argument=self)
 
 
         # Add new small asteroids every x seconds if option is selected
         if self.small_asteroids_toggle == 0:
             scene_tools.add_falling_object(self.timer, self.small_asteroid_seconds * 60, gameplay_items.MedAsteroid,
-                                           self.all_sprites, self.asteroids)
+                                           self.all_sprites, self.asteroids, argument=self)
 
         # Add new alien every x seconds if option is selected
         if self.alien_toggle == 0:
-            scene_tools.add_falling_object(self.timer, self.alien_seconds * 60, gameplay_items.Alien, self.aliens)
+            scene_tools.add_falling_object(self.timer, self.alien_seconds * 60, gameplay_items.Alien, self.aliens,
+                                           argument=self)
 
         if self.timer == 5000:
             self.next_scene = ui_scenes.TrainingGameOverScene(self.score, "win")

@@ -17,7 +17,7 @@ class GameScene(generic_scene.GenericScene):
     scrolling stars, a player ship, powerups, scores etc. """
     def __init__(self, background_image):
         super().__init__()
-
+        self.player.game_scene = self
         pygame.mouse.set_visible(False)
 
         # Setting up the game stats
@@ -28,20 +28,12 @@ class GameScene(generic_scene.GenericScene):
         self.score_font = pygame.font.Font(None, 25)
         self.timer = 0
 
-        # Explosion sound
-        self.explosion = pygame.mixer.Sound('music/explosion.wav')
-        self.explosion.set_volume(0.2)
-
         # Preloading explosion GFX
         self.images = []
         mypath = os.path.join(os.path.dirname(__file__), 'assets', 'explosion')
         for file in os.listdir(mypath):
             myfile = "assets/explosion/{0}".format(file)
             self.images.append(pygame.image.load(myfile).convert_alpha())
-
-        self.alert_played = False
-        self.alarm = pygame.mixer.Sound('music/alarm.wav')
-        self.alarm.set_volume(0.5)
 
         # Endlessly scrolling stars background
         self.background = background_image
@@ -92,10 +84,6 @@ class GameScene(generic_scene.GenericScene):
         self.all_sprites.add(self.powerup)
         self.pups.add(self.powerup)
 
-        # Powerup sound
-        self.powerup_sound = pygame.mixer.Sound('music/powerup.wav')
-        self.powerup_sound.set_volume(0.5)
-
         # Spawn stars. These are not added to all_sprites so they can be rendered on top.
         self.collectible_stars = pygame.sprite.Group()
         for i in range(2):
@@ -107,9 +95,6 @@ class GameScene(generic_scene.GenericScene):
         for i in range(11):
             star = gameplay_items.CollectStar("bronze")
             self.collectible_stars.add(star)
-        # Star sound
-        self.star_sound = pygame.mixer.Sound('music/coin.wav')
-        self.star_sound.set_volume(0.2)
 
         # Level ending beep
         self.ending_beep = pygame.mixer.Sound('music/zap.ogg')
@@ -131,7 +116,7 @@ class GameScene(generic_scene.GenericScene):
                 # Fire laser
                 elif event.key == pygame.K_SPACE:
                     if self.player.lasers > 0:
-                        self.lasers.add(gameplay_items.Laser(self.player.rect.x + 53, self.player.rect.y + 10))
+                        self.lasers.add(gameplay_items.Laser(self, self.player.rect.x + 53, self.player.rect.y + 10))
                         self.player.lasers -= 1
             # Checking for key release
             elif event.type == pygame.KEYUP:
@@ -144,15 +129,6 @@ class GameScene(generic_scene.GenericScene):
         self.timer += 1
         if self.timer % 300 == 0:
             self.score += 1
-        # Don't let the ship move outside the screen
-        if self.player.rect[0] <= 0:
-            self.player.update_pos(0, self.player.rect.y)
-        elif self.player.rect[0] >= (1024 - self.player.rect.width):
-            self.player.update_pos(1024 - self.player.rect.width, self.player.rect.y)
-        if self.player.rect[1] <= 0:
-            self.player.update_pos(self.player.rect.x, 0)
-        elif self.player.rect[1] >= (768 - self.player.rect.height):
-            self.player.update_pos(self.player.rect.x, 768 - self.player.rect.height)
 
         # Background scrolling
         self.background_y += 1
@@ -168,147 +144,13 @@ class GameScene(generic_scene.GenericScene):
         for star in self.top_stars:
             star.update_pos()
 
-        # Powerup collision detection
-        for pup in self.pups:
-            if pygame.sprite.collide_mask(self.player, pup):
-                self.score += 10
-                if pup.type == "speed":
-                    self.player.speed_boosted = True
-                elif pup.type == "laser":
-                    laser_count = self.player.lasers
-                    laser_count += 3
-                    if laser_count > 5:
-                        laser_count = 5
-                    self.player.lasers = laser_count
-                elif pup.type == "health":
-                    self.health += 50
-                    if self.health > 100:
-                        self.health = 100
-                elif pup.type == "shield":
-                    if self.player.shield is None:
-                        self.player.create_shield(self.all_sprites)
-
-                pup.reset_pos()
-                self.powerup_sound.play()
-
-        # Powerup effects
-        if self.player.speed_boosted is True:
-            self.player.speed = 8
-            self.player.speed_boost_timer += 1
-            if self.player.speed_boost_timer == 600:
-                self.player.speed_boosted = False
-                self.player.speed = 4
-                self.player.speed_boost_timer = 0
-
-        # Collectible star collision detection
-        for star in self.collectible_stars:
-            if pygame.sprite.collide_mask(self.player, star):
-                if star.star_type == "bronze":
-                    self.score += 2
-                elif star.star_type == "silver":
-                    self.score += 4
-                elif star.star_type == "gold":
-                    self.score += 10
-                star.reset_pos()
-                self.star_sound.play()
-
-        # Asteroid / player collision detection
-        # Shielded
-        if self.player.shield is not None:
-            for asteroid in self.asteroids:
-                if pygame.sprite.collide_mask(asteroid, self.player.shield):
-                    asteroid.kill()
-                    self.explosion.play()
-                    self.all_sprites.add(gameplay_items.Explosion(asteroid.rect.x, asteroid.rect.y, self.images))
-                    self.player.shield.kill()
-                    self.player.shield = None
-                    break
-        # Unshielded
-        for asteroid in self.asteroids:
-            if pygame.sprite.collide_mask(asteroid, self.player):
-                asteroid.kill()
-                self.explosion.play()
-                self.all_sprites.add(gameplay_items.Explosion(asteroid.rect.x, asteroid.rect.y, self.images))
-                if self.health - 30 < 20 and self.alert_played is False:
-                    self.alarm.play()
-                    self.alert_played = True
-                self.health -= 30
-
-        # Asteroid / laser collision detection
-        for laser in self.lasers:
-            for asteroid in self.asteroids:
-                if pygame.sprite.collide_mask(laser, asteroid):
-                    self.score += 5
-                    laser.kill()
-                    asteroid.kill()
-                    self.explosion.play()
-                    self.all_sprites.add(gameplay_items.Explosion(asteroid.rect.x, asteroid.rect.y, self.images))
-
-        # Alien / laser collision detection
-        for laser in self.lasers:
-            for alien in self.aliens:
-                if pygame.sprite.collide_mask(laser, alien):
-                    self.score += 30
-                    laser.kill()
-                    self.aliens.remove(alien)
-                    self.explosion.play()
-                    self.all_sprites.add(
-                        gameplay_items.Explosion(alien.rect.x, alien.rect.y, self.images))
-
-        # Alien / player collision detection
-        # Shielded
-        if self.player.shield is not None:
-            for alien in self.aliens:
-                if pygame.sprite.collide_mask(alien, self.player.shield):
-                    self.aliens.remove(alien)
-                    self.explosion.play()
-                    self.all_sprites.add(gameplay_items.Explosion(alien.rect.x, alien.rect.y, self.images))
-                    self.player.shield.kill()
-                    self.player.shield = None
-                    break
-        # Unshielded
-        for alien in self.aliens:
-            if pygame.sprite.collide_mask(alien, self.player):
-                self.aliens.remove(alien)
-                self.explosion.play()
-                self.all_sprites.add(gameplay_items.Explosion(alien.rect.x, alien.rect.y, self.images))
-                if self.health - 30 < 20 and self.alert_played is False:
-                    self.alarm.play()
-                    self.alert_played = True
-                self.health -= 30
-
-        # Alien lasers / player collision detection
-        # Shielded
-        if self.player.shield is not None:
-            for alien in self.aliens:
-                for laser in alien.lasers:
-                    if pygame.sprite.collide_mask(laser, self.player):
-                        laser.kill()
-                        self.explosion.play()
-                        self.all_sprites.add(gameplay_items.Explosion(laser.rect.x, laser.rect.y, self.images))
-                        self.player.shield.kill()
-                        self.player.shield = None
-                        break
-        # Unshielded
-        for alien in self.aliens:
-            for laser in alien.lasers:
-                if pygame.sprite.collide_mask(laser, self.player):
-                    laser.kill()
-                    self.explosion.play()
-                    self.all_sprites.add(gameplay_items.Explosion(laser.rect.x, laser.rect.y, self.images))
-                    if self.health - 30 < 20 and self.alert_played is False:
-                        self.alarm.play()
-                        self.alert_played = True
-                    self.health -= 30
-
         # Death
         if self.health <= 0:
             self.lives -= 1
-            self.explosion.play()
             self.all_sprites.add(gameplay_items.Explosion(self.player.rect.x, self.player.rect.y, self.images))
             scene_tools.death_scene_reset([self.asteroids, self.pups, self.collectible_stars], self.player)
             self.health = 100
-            self.alert_played = False
+            self.player.alert_played = False
 
         # Level ending beeps
         if self.timer == 4700 or self.timer == 4760 or self.timer == 4820 or self.timer == 4880 or self.timer == 4940:
@@ -366,3 +208,5 @@ class GameScene(generic_scene.GenericScene):
         lasers_text = "Laser charges remaining: {0!s}".format(self.player.lasers)
         lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
         screen.blit(lasers_render, (10, 740))
+
+
