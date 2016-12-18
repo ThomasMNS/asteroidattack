@@ -21,6 +21,7 @@ Requires Python 3 and Pygame. Creates and edits a highscores file (asteroid-atta
 
 # Change log
 
+* 18/12/2016 - Added strong purple asteroids. These are slow, but take multiple shots to destroy and will cause some hefty damage if you collide with one. All levels have been reworked to make room for the newly added enemies, with different obstacles now appearing in earlier levels. Finally, the code handling collision detection, death etc. has been given a significant rewrite to reduce unneeded code repetition and make it easier to add new enemies in the future.
 * 13/12/2016 - Added fragmenting asteroids. These can be found in level 8.
 * 09/12/2016 - Added simple ship appearance customisation options that work in both game modes. 
 * 07/12/2016 - Added sound effects to indicate the player is coming to the end of a level. "Level complete" screens are again being correctly displayed after each level. 
