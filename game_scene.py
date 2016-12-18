@@ -18,6 +18,8 @@ class GameScene(generic_scene.GenericScene):
     def __init__(self, background_image):
         super().__init__()
         self.player.game_scene = self
+        if self.player_2 is not None:
+            self.player_2.game_scene = self
         pygame.mouse.set_visible(False)
 
         # Setting up the game stats
@@ -62,6 +64,10 @@ class GameScene(generic_scene.GenericScene):
         # Create a player ship object, and place near the bottom of the screen
         self.player.update_pos(50, 600)
         self.all_sprites.add(self.player)
+        if self.player_2 is not None:
+            self.player_2.update_pos(500, 600)
+            self.all_sprites.add(self.player_2)
+
         # Creating a container for lasers
         self.lasers = pygame.sprite.Group()
 
@@ -99,9 +105,17 @@ class GameScene(generic_scene.GenericScene):
         # Level ending beep
         self.ending_beep = pygame.mixer.Sound('music/zap.ogg')
 
+        # Player 2 handling
+        self.joystick_count = pygame.joystick.get_count()
+        if self.joystick_count >= 1:
+            self.my_joystick = pygame.joystick.Joystick(0)
+            self.my_joystick.init()
+            print("Joystick created")
+            print(self.my_joystick)
+
     def handle_events(self, events):
         for event in events:
-            # Ship keyboard controls
+            # Ship 1 keyboard controls
             # Checking for key press
             if event.type == pygame.KEYDOWN:
                 # Movement
@@ -124,6 +138,25 @@ class GameScene(generic_scene.GenericScene):
                     self.player.y_speed = 0
                 elif event.key == pygame.K_a or event.key == pygame.K_d:
                     self.player.x_speed = 0
+
+        # Player 2 handling
+        if self.joystick_count != 0:
+            horiz_axis_pos = self.my_joystick.get_axis(0)
+            vert_axis_pos = self.my_joystick.get_axis(1)
+            if self.player_2 is not None:
+                if vert_axis_pos < -0.5:
+                    self.player_2.y_speed = -self.player.speed
+                elif vert_axis_pos > 0.5:
+                    self.player_2.y_speed = self.player.speed
+                else:
+                    self.player_2.y_speed = 0
+
+                if horiz_axis_pos < -0.5:
+                    self.player_2.x_speed = -self.player.speed
+                elif horiz_axis_pos > 0.5:
+                    self.player_2.x_speed = self.player.speed
+                else:
+                    self.player_2.x_speed = 0
 
     def update(self):
         self.timer += 1

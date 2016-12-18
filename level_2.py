@@ -12,8 +12,9 @@ import level_3
 
 class LevelTwo(game_scene.GameScene):
     """ Class for level 2. """
-    def __init__(self, ship, score, lives, health):
+    def __init__(self, ship, ship_2, score, lives, health):
         self.player = ship
+        self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
         self.score = score
         self.lives = lives

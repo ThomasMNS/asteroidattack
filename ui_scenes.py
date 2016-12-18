@@ -450,11 +450,12 @@ class AcknowledgementsScene(generic_scene.GenericScene):
 
 class GetReadyScene(generic_scene.GenericScene):
     """ Displayed before Level 1 begins to give the player a moment to prepare."""
-    def __init__(self, mode, ship, choices=None):
+    def __init__(self, mode, ship, ship_2=None, choices=None):
         super().__init__()
         self.mode = mode
         self.choices = choices
         self.ship = ship
+        self.ship_2 = ship_2
 
         self.font = pygame.font.Font(None, 190)
         self.get_ready_text = "Get ready!"
@@ -469,7 +470,7 @@ class GetReadyScene(generic_scene.GenericScene):
         self.timer += 1
         if self.timer > 240:
             if self.mode == "campaign":
-                self.next_scene = level_1.LevelOne(self.ship)
+                self.next_scene = level_1.LevelOne(self.ship, self.ship_2)
             elif self.mode == "training":
                 self.next_scene = training_scene.TrainingScene(self.ship, self.choices)
 
@@ -480,7 +481,7 @@ class GetReadyScene(generic_scene.GenericScene):
 
 class LevelCompleteScene(generic_scene.GenericScene):
     """ Displayed between levels. Shows the player's score and gives them a chance to prepare. """
-    def __init__(self, ship, score, lives, health, level):
+    def __init__(self, ship, ship_2, score, lives, health, level):
         super().__init__()
         self.score = score
         self.lives = lives
@@ -488,6 +489,7 @@ class LevelCompleteScene(generic_scene.GenericScene):
         self.level = level
         self.timer = 0
         self.player = ship
+        self.player_2 = ship_2
 
         self.font = pygame.font.Font(None, 150)
         self.smaller_font = pygame.font.Font(None, 60)
@@ -507,7 +509,7 @@ class LevelCompleteScene(generic_scene.GenericScene):
     def update(self):
         self.timer += 1
         if self.timer > 240:
-            self.next_scene = self.level(self.player, self.score, self.lives, self.health)
+            self.next_scene = self.level(self.player, self.player_2, self.score, self.lives, self.health)
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)
