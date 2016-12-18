@@ -232,6 +232,8 @@ class PlayerNumberScene(generic_scene.GenericScene):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.single_button.mouse_over is True:
                 self.next_scene = customisation_scene.CustomisationScene("campaign", 1)
+            if event.type == pygame.MOUSEBUTTONDOWN and self.multi_button.mouse_over is True:
+                self.next_scene = customisation_scene.CustomisationScene("campaign", 2, 1)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
                 self.next_scene = GameModeSelectionScene()
 

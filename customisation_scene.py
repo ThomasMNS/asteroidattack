@@ -13,8 +13,11 @@ import test_level
 
 class CustomisationScene(generic_scene.GenericScene):
     """ Class for a scene allowing players to change the appearance of their ship. """
-    def __init__(self, next_level, player_count):
+    def __init__(self, next_level, player_count, player_choosing=None, player_one=None):
         super().__init__()
+
+        self.player_choosing = player_choosing
+        self.player_one = player_one
 
         self.next_level = next_level
         self.player_count = player_count
@@ -42,7 +45,11 @@ class CustomisationScene(generic_scene.GenericScene):
                                                         constants.SHIP_RED)
 
         # Start
-        self.start_button = ui_items.RectangleHoverButton("Start", 300, 90, 362, 640)
+        if self.player_count == 2 and self.player_choosing == 1:
+            start_txt = "Continue"
+        else:
+            start_txt = "Start"
+        self.start_button = ui_items.RectangleHoverButton(start_txt, 300, 90, 362, 640)
 
         self.buttons = [self.nova_button, self.nebula_button, self.galaxy_button,
                         self.blue_button, self.green_button, self.orange_button, self.red_button,
@@ -96,6 +103,13 @@ class CustomisationScene(generic_scene.GenericScene):
                         self.next_scene = ui_scenes.GetReadyScene("campaign", self.ship)
                     elif self.next_level == "training":
                         self.next_scene = ui_scenes.TrainingSetupScene(self.ship)
+                if self.player_count == 2:
+                    if self.player_choosing == 1:
+                        if self.next_level == "campaign":
+                            self.next_scene = CustomisationScene("campaign", 2, 2, self.ship)
+                    elif self.player_choosing == 2:
+                        if self.next_level == "campaign":
+                            self.next_scene = ui_scenes.GetReadyScene("campaign", self.player_one)
             # Testing
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
