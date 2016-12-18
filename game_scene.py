@@ -138,25 +138,31 @@ class GameScene(generic_scene.GenericScene):
                     self.player.y_speed = 0
                 elif event.key == pygame.K_a or event.key == pygame.K_d:
                     self.player.x_speed = 0
+            # Player 2 firing
+            if self.player_2 is not None:
+                if event.type == pygame.JOYBUTTONDOWN:
+                    if event.button == 1:
+                        self.lasers.add(gameplay_items.Laser(self, self.player_2.rect.x + 53, self.player_2.rect.y + 10))
+                        self.player_2.lasers -= 1
 
-        # Player 2 handling
-        if self.joystick_count != 0:
+        # Player 2 movement handling
+        if self.player_2 is not None:
+            # Movement
             horiz_axis_pos = self.my_joystick.get_axis(0)
             vert_axis_pos = self.my_joystick.get_axis(1)
-            if self.player_2 is not None:
-                if vert_axis_pos < -0.5:
-                    self.player_2.y_speed = -self.player.speed
-                elif vert_axis_pos > 0.5:
-                    self.player_2.y_speed = self.player.speed
-                else:
-                    self.player_2.y_speed = 0
+            if vert_axis_pos < -0.5:
+                self.player_2.y_speed = -self.player.speed
+            elif vert_axis_pos > 0.5:
+                self.player_2.y_speed = self.player.speed
+            else:
+                self.player_2.y_speed = 0
 
-                if horiz_axis_pos < -0.5:
-                    self.player_2.x_speed = -self.player.speed
-                elif horiz_axis_pos > 0.5:
-                    self.player_2.x_speed = self.player.speed
-                else:
-                    self.player_2.x_speed = 0
+            if horiz_axis_pos < -0.5:
+                self.player_2.x_speed = -self.player.speed
+            elif horiz_axis_pos > 0.5:
+                self.player_2.x_speed = self.player.speed
+            else:
+                self.player_2.x_speed = 0
 
     def update(self):
         self.timer += 1
