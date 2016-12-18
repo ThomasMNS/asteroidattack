@@ -19,18 +19,26 @@ class LevelEight(game_scene.GameScene):
         self.health = health
 
         # Fill it with brown asteroids
-        scene_tools.initial_falling_objects(3, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
+        scene_tools.initial_falling_objects(2, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
                                             argument=self)
         # Fill it with grey asteroids
-        scene_tools.initial_falling_objects(2, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids,
+        scene_tools.initial_falling_objects(1, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids,
                                             argument=self)
+
+        # Fill it with fragmenting asteroids
+        scene_tools.initial_falling_objects(1, gameplay_items.FragmentingAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
+
+        # Fill it with aliens
+        scene_tools.initial_falling_objects(1, gameplay_items.Alien, self.aliens, argument=self)
+
         # Fill it with small asteroids
         scene_tools.initial_falling_objects(2, gameplay_items.MedAsteroid, self.all_sprites, self.asteroids,
                                             argument=self)
-        # Fill it with aliens
-        scene_tools.initial_falling_objects(1, gameplay_items.Alien, self.aliens, argument=self)
-        # Fill with fragmenting asteroids
-        scene_tools.initial_falling_objects(1, gameplay_items.FragmentingAsteroid, self.all_sprites, argument=self)
+
+        # Fill it with strong asteroids
+        scene_tools.initial_falling_objects(1, gameplay_items.StrongAsteroid, self.all_sprites, self.asteroids,
+                                            argument=self)
 
     def handle_events(self, events):
         super().handle_events(events)
@@ -40,17 +48,24 @@ class LevelEight(game_scene.GameScene):
         # Add a new brown asteroid every 10 seconds
         scene_tools.add_falling_object(self.timer, 600, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
                                        argument=self)
-        # Add a new grey asteroid every 10 seconds
-        scene_tools.add_falling_object(self.timer, 600, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids,
+        # Add a new grey asteroid every 12 seconds
+        scene_tools.add_falling_object(self.timer, 720, gameplay_items.GreyAsteroid, self.all_sprites, self.asteroids,
                                        argument=self)
-        # Add a new small asteroid every 10 seconds
-        scene_tools.add_falling_object(self.timer, 600, gameplay_items.MedAsteroid, self.all_sprites, self.asteroids,
-                                       argument=self)
-        # Add a new alien every 15 seconds
-        scene_tools.add_falling_object(self.timer, 900, gameplay_items.Alien, self.aliens, argument=self)
+
         # Add a new fragmenting asteroid every 20 seconds
         scene_tools.add_falling_object(self.timer, 1200, gameplay_items.FragmentingAsteroid, self.all_sprites,
-                                       argument=self)
+                                       self.asteroids, argument=self)
+
+        # Add a new alien every 15 seconds
+        scene_tools.add_falling_object(self.timer, 900, gameplay_items.Alien, self.aliens, argument=self)
+
+        # Add a new small asteroid every 30 seconds
+        scene_tools.add_falling_object(self.timer, 1800, gameplay_items.MedAsteroid, self.all_sprites,
+                                       self.asteroids, argument=self)
+
+        # Add a new strong asteroid every 30 seconds
+        scene_tools.add_falling_object(self.timer, 1800, gameplay_items.StrongAsteroid, self.all_sprites,
+                                       self.asteroids, argument=self)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")
