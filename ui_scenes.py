@@ -481,11 +481,10 @@ class GetReadyScene(generic_scene.GenericScene):
 
 class LevelCompleteScene(generic_scene.GenericScene):
     """ Displayed between levels. Shows the player's score and gives them a chance to prepare. """
-    def __init__(self, ship, ship_2, score, lives, health, level):
+    def __init__(self, ship, ship_2, score, lives, level):
         super().__init__()
         self.score = score
         self.lives = lives
-        self.health = health
         self.level = level
         self.timer = 0
         self.player = ship
@@ -509,7 +508,7 @@ class LevelCompleteScene(generic_scene.GenericScene):
     def update(self):
         self.timer += 1
         if self.timer > 240:
-            self.next_scene = self.level(self.player, self.player_2, self.score, self.lives, self.health)
+            self.next_scene = self.level(self.player, self.player_2, self.score, self.lives)
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)
