@@ -22,10 +22,6 @@ class GameScene(generic_scene.GenericScene):
             self.player_2.game_scene = self
         pygame.mouse.set_visible(False)
 
-        # Setting up the game stats
-        self.score = 0
-        self.lives = 3
-        self.health = 100
         # Text and scores
         self.score_font = pygame.font.Font(None, 25)
         self.timer = 0
@@ -110,8 +106,6 @@ class GameScene(generic_scene.GenericScene):
         if self.joystick_count >= 1:
             self.my_joystick = pygame.joystick.Joystick(0)
             self.my_joystick.init()
-            print("Joystick created")
-            print(self.my_joystick)
 
     def handle_events(self, events):
         for event in events:
@@ -183,14 +177,6 @@ class GameScene(generic_scene.GenericScene):
         for star in self.top_stars:
             star.update_pos()
 
-        # Death
-        if self.health <= 0:
-            self.lives -= 1
-            self.all_sprites.add(gameplay_items.Explosion(self.player.rect.x, self.player.rect.y, self.images))
-            scene_tools.death_scene_reset([self.asteroids, self.pups, self.collectible_stars], self.player)
-            self.health = 100
-            self.player.alert_played = False
-
         # Level ending beeps
         if self.timer == 4700 or self.timer == 4760 or self.timer == 4820 or self.timer == 4880 or self.timer == 4940:
             self.ending_beep.play()
@@ -225,12 +211,25 @@ class GameScene(generic_scene.GenericScene):
         score_text = "Score: {0!s}".format(self.score)
         score_render = self.score_font.render(score_text, True, constants.WHITE)
         screen.blit(score_render, (10, 40))
-        health_text = "Health: {0!s}".format(self.health)
+        if self.player_2 is None:
+            health_text = "Health: {0!s}".format(self.player.health)
+        else:
+            health_text = "Player 1 Health: {0!s}".format(self.player.health)
         health_render = self.score_font.render(health_text, True, constants.WHITE)
         screen.blit(health_render, (10, 70))
-        lives_text = "Lives: {0!s}".format(self.lives)
-        lives_render = self.score_font.render(lives_text, True, constants.WHITE)
-        screen.blit(lives_render, (10, 100))
+        # Lives at bottom if no player 2
+        if self.player_2 is None:
+            lives_text = "Lives: {0!s}".format(self.lives)
+            lives_render = self.score_font.render(lives_text, True, constants.WHITE)
+            screen.blit(lives_render, (10, 100))
+        # Display player 2 health if present
+        if self.player_2 is not None:
+            health_text_2 = "Player 2 Health: {0!s}".format(self.player_2.health)
+            health_render_2 = self.score_font.render(health_text_2, True, constants.WHITE)
+            screen.blit(health_render_2, (10, 100))
+            lives_text = "Lives: {0!s}".format(self.lives)
+            lives_render = self.score_font.render(lives_text, True, constants.WHITE)
+            screen.blit(lives_render, (10, 130))
         # Bottom left
         if self.player.speed_boosted is True:
             speed_boost_render = self.score_font.render("Speed boosted!", True, constants.WHITE)
