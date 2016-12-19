@@ -55,7 +55,7 @@ def add_falling_object(timer, time, obj_class, container_1, container_2=None,
             container_3.add(funcobj)
 
 
-def death_scene_reset(groups, player):
+def death_scene_reset(groups, player, player_2):
     """ Takes a list of sprite groups and a player sprite and changes their positions to reset the
     scene after death. """
     for group in groups:
@@ -65,3 +65,7 @@ def death_scene_reset(groups, player):
     x = random.randrange(200, 800)
     player.update_pos(x, 600)
     player.speed_boosted = False
+
+    if player_2 is not None:
+        player_2.update_pos(x, 600)
+        player_2.speed_boosted = False
