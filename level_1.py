@@ -15,8 +15,9 @@ class LevelOne(game_scene.GameScene):
     def __init__(self, ship, ship_2=None):
         self.score = 0
         self.lives = 3
-        self.health = 100
+
         self.player = ship
+        # If there is only one player, self.player_2 = None
         self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
 
@@ -35,7 +36,7 @@ class LevelOne(game_scene.GameScene):
 
         if self.timer == 5000:
             self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
-                                                           self.health, level_2.LevelTwo)
+                                                           level_2.LevelTwo)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose")

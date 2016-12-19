@@ -12,7 +12,7 @@ import level_5
 
 class LevelFour(game_scene.GameScene):
     """ Class for level 4. """
-    def __init__(self, ship, score, lives, health):
+    def __init__(self, ship, score, lives):
         self.player = ship
         super().__init__(pygame.image.load('assets/dark_blue_stars.png').convert())
 
@@ -32,7 +32,6 @@ class LevelFour(game_scene.GameScene):
 
         self.score = score
         self.lives = lives
-        self.health = health
 
     def handle_events(self, events):
         super().handle_events(events)

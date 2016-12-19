@@ -39,7 +39,6 @@ class LevelSeven(game_scene.GameScene):
 
         self.score = score
         self.lives = lives
-        self.health = health
 
     def handle_events(self, events):
         super().handle_events(events)
