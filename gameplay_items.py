@@ -3,8 +3,10 @@ obstacles (E.g. asteroids), powerups (E.g. speed boost) and scenery (E.g. stars)
 
 # Pygame
 import pygame
-# Game modules
+# Standard library
 import random
+# Game modules
+import scene_tools
 
 
 # Gameplay
@@ -43,6 +45,8 @@ class PlayerShip(pygame.sprite.Sprite):
         self.star_sound = pygame.mixer.Sound('music/coin.wav')
         self.star_sound.set_volume(0.2)
 
+        self.health = 100
+
     def update_pos(self, x, y):
         self.rect.x = x
         self.rect.y = y
@@ -73,9 +77,9 @@ class PlayerShip(pygame.sprite.Sprite):
                             laser_count = 5
                         self.lasers = laser_count
                     elif pup.type == "health":
-                        self.game_scene.health += 50
-                        if self.game_scene.health > 100:
-                            self.game_scene.health = 100
+                        self.health += 50
+                        if self.health > 100:
+                            self.health = 100
                     elif pup.type == "shield":
                         if self.shield is None:
                             self.create_shield(self.game_scene.all_sprites)
@@ -114,6 +118,16 @@ class PlayerShip(pygame.sprite.Sprite):
         elif self.rect[1] >= (768 - self.rect.height):
             self.update_pos(self.rect.x, 768 - self.rect.height)
 
+
+        # Death
+        if self.health <= 0:
+            self.game_scene.lives -= 1
+            self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+            scene_tools.death_scene_reset([self.game_scene.asteroids, self.game_scene.pups,
+                                           self.game_scene.collectible_stars], self, self.game_scene.player_2)
+            self.health = 100
+            self.alert_played = False
+
     def create_shield(self, sprite_group):
         self.shield = Shield(self)
         self.shield.update_pos(self)
@@ -133,10 +147,10 @@ class PlayerShip(pygame.sprite.Sprite):
             if self.shield is None:
                 if pygame.sprite.collide_mask(enemy, self):
                     enemy.collision()
-                    if self.game_scene.health - enemy.health_decrease < 20 and self.alert_played is False:
+                    if self.health - enemy.health_decrease < 20 and self.alert_played is False:
                         self.alarm.play()
                         self.alert_played = True
-                    self.game_scene.health -= enemy.health_decrease
+                    self.health -= enemy.health_decrease
             elif self.shield is not None:
                 if pygame.sprite.collide_mask(enemy, self.shield):
                     enemy.collision()
