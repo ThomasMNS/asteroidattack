@@ -72,7 +72,6 @@ class RectangleHoverButton(Button):
             self.sound_played = False
 
 
-
 class Popup:
     """ A coloured box that displays some text. Positioned at a given XY location, unless
     screen dimensions are given, where it is centered. """
