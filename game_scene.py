@@ -231,20 +231,61 @@ class GameScene(generic_scene.GenericScene):
             lives_render = self.score_font.render(lives_text, True, constants.WHITE)
             screen.blit(lives_render, (10, 130))
         # Bottom left
-        if self.player.speed_boosted is True:
-            speed_boost_render = self.score_font.render("Speed boosted!", True, constants.WHITE)
-            screen.blit(speed_boost_render, (10, 680))
+        if self.player_2 is None:
+            if self.player.speed_boosted is True:
+                speed_boost_render = self.score_font.render("Speed boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 680))
+        else:
+            if self.player.speed_boosted is True and self.player_2.speed_boosted is False:
+                speed_boost_render = self.score_font.render("Player 1 Speed Boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 620))
+            elif self.player.speed_boosted is False and self.player_2.speed_boosted is True:
+                speed_boost_render = self.score_font.render("Player 2 Speed Boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 620))
+            elif self.player.speed_boosted is True and self.player_2.speed_boosted is True:
+                speed_boost_render = self.score_font.render("Player 1 Speed Boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 590))
+
+                speed_boost_render = self.score_font.render("Player 2 Speed Boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 620))
+
         x_speed = self.player.x_speed
         y_speed = self.player.y_speed
         if y_speed < 0:
             y_speed = abs(y_speed)
         elif y_speed > 0:
             y_speed = - y_speed
-        speed_text = "Ship speed: {0!s} / {1!s}".format(int(y_speed), int(x_speed))
-        speed_render = self.score_font.render(speed_text, True, constants.WHITE)
-        screen.blit(speed_render, (10, 710))
-        lasers_text = "Laser charges remaining: {0!s}".format(self.player.lasers)
-        lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
-        screen.blit(lasers_render, (10, 740))
+        if self.player_2 is None:
+            speed_text = "Ship Speed: {0!s} / {1!s}".format(int(y_speed), int(x_speed))
+            speed_render = self.score_font.render(speed_text, True, constants.WHITE)
+            screen.blit(speed_render, (10, 710))
+        else:
+            speed_text = "Player 1 Speed: {0!s} / {1!s}".format(int(y_speed), int(x_speed))
+            speed_render = self.score_font.render(speed_text, True, constants.WHITE)
+            screen.blit(speed_render, (10, 650))
+
+            x_speed = self.player_2.x_speed
+            y_speed = self.player_2.y_speed
+            if y_speed < 0:
+                y_speed = abs(y_speed)
+            elif y_speed > 0:
+                y_speed = - y_speed
+
+            speed_text = "Player 2 Speed: {0!s} / {1!s}".format(int(y_speed), int(x_speed))
+            speed_render = self.score_font.render(speed_text, True, constants.WHITE)
+            screen.blit(speed_render, (10, 680))
+
+        if self.player_2 is None:
+            lasers_text = "Laser Charges: {0!s}".format(self.player.lasers)
+            lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
+            screen.blit(lasers_render, (10, 740))
+        else:
+            lasers_text = "Player 1 Laser Charges: {0!s}".format(self.player.lasers)
+            lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
+            screen.blit(lasers_render, (10, 710))
+
+            lasers_text = "Player 2 Laser Charges: {0!s}".format(self.player_2.lasers)
+            lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
+            screen.blit(lasers_render, (10, 740))
 
 
