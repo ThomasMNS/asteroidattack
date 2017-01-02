@@ -98,6 +98,23 @@ class Popup:
         scene_tools.multiline_text(self.text, self.x + 10, self.y + 50, screen, constants.WHITE, 35)
 
 
+class Tooltip(Popup):
+    """ A coloured box that displays some text. Positioned next to the mouse cursor."""
+    def __init__(self, text, width, height, bg_color=constants.LIGHT_GREY_2):
+        x = pygame.mouse.get_pos()[0]
+        y = pygame.mouse.get_pos()[1]
+        super().__init__(text, width, height, x, y, bg_color=bg_color)
+        self.visible = False
+
+    def update(self):
+        self.x = pygame.mouse.get_pos()[0]
+        self.y = pygame.mouse.get_pos()[1]
+
+    def draw(self, screen):
+        if self.visible is True:
+            super().draw(screen)
+
+
 class Modal(Popup):
     """ A coloured box that displays some text and fades out the rest of the screen.
     Two buttons can be optionally defined. """
