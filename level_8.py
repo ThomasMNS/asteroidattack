@@ -11,8 +11,9 @@ import scene_tools
 
 class LevelEight(game_scene.GameScene):
     """ Class for level 8. """
-    def __init__(self, ship, score, lives):
+    def __init__(self, ship, ship_2, score, lives):
         self.player = ship
+        self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/purple_stars.png').convert())
         self.score = score
         self.lives = lives

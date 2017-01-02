@@ -12,8 +12,9 @@ import level_4
 
 class LevelThree(game_scene.GameScene):
     """ Class for level 3. """
-    def __init__(self, ship, score, lives):
+    def __init__(self, ship, ship_2, score, lives):
         self.player = ship
+        self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/dark_blue_stars.png').convert())
         # Fill it with brown asteroids
         scene_tools.initial_falling_objects(2, gameplay_items.BrownAsteroid, self.all_sprites, self.asteroids,
@@ -46,7 +47,7 @@ class LevelThree(game_scene.GameScene):
                                        self.asteroids, argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.score, self.lives, self.health,
+            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
                                                            level_4.LevelFour)
 
         if self.lives == 0:

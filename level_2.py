@@ -41,7 +41,7 @@ class LevelTwo(game_scene.GameScene):
                                        argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.score, self.lives, self.health,
+            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
                                                            level_3.LevelThree)
 
         if self.lives == 0:
