@@ -95,7 +95,7 @@ class Popup:
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.bg_color, (self.x, self.y, self.width, self.height))
-        scene_tools.multiline_text(self.text, self.x + 10, self.y + 50, screen, constants.WHITE, 35)
+        scene_tools.multiline_text(self.text, self.x + 10, self.y + 10, screen, constants.WHITE, 30)
 
 
 class Tooltip(Popup):
