@@ -235,15 +235,19 @@ class PlayerNumberScene(generic_scene.GenericScene):
         if self.joystick_connected is True:
             self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500)
         else:
+            # If there is no joystick, display as greyed out
             self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500, color=constants.DARK_GREY)
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 600)
         self.buttons = [self.single_button, self.multi_button, self.return_button]
+
+        # Tooltip
+        self.multi_tip = ui_items.Tooltip(["Test", "Test"], 100, 100)
 
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.single_button.mouse_over is True:
                 self.next_scene = customisation_scene.CustomisationScene("campaign", 1)
-            if event.type == pygame.MOUSEBUTTONDOWN and self.multi_button.mouse_over is True:
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.multi_button.mouse_over is True:
                 if self.joystick_connected is True:
                     self.next_scene = customisation_scene.CustomisationScene("campaign", 2, 1)
                 else:
@@ -251,15 +255,22 @@ class PlayerNumberScene(generic_scene.GenericScene):
             elif event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
                 self.next_scene = GameModeSelectionScene()
 
-
     def update(self):
         for button in self.buttons:
             button.mouse_on_button(pygame.mouse.get_pos())
+        self.multi_tip.update()
+
+        if self.multi_button.mouse_over is True:
+            self.multi_tip.visible = True
+        else:
+            self.multi_tip.visible = False
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)
         for button in self.buttons:
             button.draw_button(screen)
+        if self.multi_tip.visible is True and self.joystick_connected is False:
+            self.multi_tip.draw(screen)
 
 
 class TrainingSetupScene(generic_scene.GenericScene):
