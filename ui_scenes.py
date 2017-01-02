@@ -241,7 +241,7 @@ class PlayerNumberScene(generic_scene.GenericScene):
         self.buttons = [self.single_button, self.multi_button, self.return_button]
 
         # Tooltip
-        self.multi_tip = ui_items.Tooltip(["Test", "Test"], 100, 100)
+        self.multi_tip = ui_items.Tooltip(["No joystick", "detected"], 130, 70)
 
     def handle_events(self, events):
         for event in events:
