@@ -223,8 +223,19 @@ class PlayerNumberScene(generic_scene.GenericScene):
     """ A class for a screen with buttons allowing the player to select single or multi-player mode. """
     def __init__(self):
         super().__init__()
+
+        # Check if there is a joystick connected. To be used to check whether multiplaer can be selected.
+        self.joystick_count = pygame.joystick.get_count()
+        if self.joystick_count >= 1:
+            self.joystick_connected = True
+        else:
+            self.joystick_connected = False
+
         self.single_button = ui_items.RectangleHoverButton("One Player", 300, 90, 362, 400)
-        self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500)
+        if self.joystick_connected is True:
+            self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500)
+        else:
+            self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500, color=constants.DARK_GREY)
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 600)
         self.buttons = [self.single_button, self.multi_button, self.return_button]
 
@@ -233,7 +244,10 @@ class PlayerNumberScene(generic_scene.GenericScene):
             if event.type == pygame.MOUSEBUTTONDOWN and self.single_button.mouse_over is True:
                 self.next_scene = customisation_scene.CustomisationScene("campaign", 1)
             if event.type == pygame.MOUSEBUTTONDOWN and self.multi_button.mouse_over is True:
-                self.next_scene = customisation_scene.CustomisationScene("campaign", 2, 1)
+                if self.joystick_connected is True:
+                    self.next_scene = customisation_scene.CustomisationScene("campaign", 2, 1)
+                else:
+                    pass
             elif event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
                 self.next_scene = GameModeSelectionScene()
 
