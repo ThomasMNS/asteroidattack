@@ -65,11 +65,14 @@ class PlayerShip(pygame.sprite.Sprite):
             for alien in self.game_scene.aliens:
                 self.collision_detection(alien.lasers)
 
-            # # Check if this is player one
-            # if self.game_scene.player is self:
-            #     # Check if there is a player 2
-            #     if self.game_scene.player_2 is not None:
-            #         self.collision_detection(self.game_scene.player_2.lasers)
+            # Check if this is player one
+            if self.game_scene.player is self:
+                # Check if there is a player 2
+                if self.game_scene.player_2 is not None:
+                    self.collision_detection(self.game_scene.player_2.lasers_group)
+            # Check if this is player two
+            if self.game_scene.player_2 is self:
+                self.collision_detection(self.game_scene.player.lasers_group)
 
             # Powerup collision detection
             for pup in self.game_scene.pups:
@@ -156,7 +159,7 @@ class PlayerShip(pygame.sprite.Sprite):
             if self.shield is None:
                 if pygame.sprite.collide_mask(enemy, self):
                     enemy.collision()
-                    if self.health - enemy.health_decrease < 20 and self.alert_played is False:
+                    if self.health - enemy.health_decrease < 25 and self.alert_played is False:
                         self.alarm.play()
                         self.alert_played = True
                     self.health -= enemy.health_decrease
@@ -199,6 +202,8 @@ class Laser(pygame.sprite.Sprite):
         self.sound = pygame.mixer.Sound('music/laser.ogg')
         self.sound.play()
 
+        self.health_decrease = 20
+
     def update(self):
         self.rect.y += self.speed
         if self.rect.y < -100:
@@ -213,6 +218,10 @@ class Laser(pygame.sprite.Sprite):
                 self.kill()
                 enemy.collision()
                 self.game_scene.score += enemy.score_increase
+
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.kill()
 
 
 class BrownAsteroid(pygame.sprite.Sprite):
