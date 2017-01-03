@@ -13,7 +13,7 @@ import test_level
 
 class CustomisationScene(generic_scene.GenericScene):
     """ Class for a scene allowing players to change the appearance of their ship. """
-    def __init__(self, next_level, player_count, player_choosing=None, player_one=None):
+    def __init__(self, next_level, player_count, player_choosing=None, player_one=None, player_one_choice=None):
         super().__init__()
 
         self.player_choosing = player_choosing
@@ -21,6 +21,8 @@ class CustomisationScene(generic_scene.GenericScene):
 
         self.next_level = next_level
         self.player_count = player_count
+
+        self.player_one_choice = player_one_choice
 
         # Place a player ship in the middle of the scene
         self.ship = gameplay_items.PlayerShip()
@@ -82,8 +84,12 @@ class CustomisationScene(generic_scene.GenericScene):
 
         # Customisation selections
         self.ship_class = "2"
-        self.ship_color = "red"
+        self.ship_color = "blue"
         self.ship_changed = False
+
+        self.ships_same = False
+        self.same_tooltip = ui_items.Tooltip(["Both ships have the same appearance!",
+                                              "This could make things confusing."], 400, 75)
 
     def handle_events(self, events):
         for event in events:
@@ -121,7 +127,7 @@ class CustomisationScene(generic_scene.GenericScene):
                 if self.player_count == 2:
                     if self.player_choosing == 1:
                         if self.next_level == "campaign":
-                            self.next_scene = CustomisationScene("campaign", 2, 2, self.ship)
+                            self.next_scene = CustomisationScene("campaign", 2, 2, self.ship, self.appearance)
                     elif self.player_choosing == 2:
                         if self.next_level == "campaign":
                             self.next_scene = ui_scenes.GetReadyScene("campaign", self.player_one, self.ship)
@@ -134,9 +140,22 @@ class CustomisationScene(generic_scene.GenericScene):
         for button in self.buttons:
             button.mouse_on_button(pygame.mouse.get_pos())
 
+        self.same_tooltip.update()
+        if self.ships_same is True and self.start_button.mouse_over is True:
+            self.same_tooltip.visible = True
+        else:
+            self.same_tooltip.visible = False
+
+        self.appearance = 'assets/player_ship/playerShip{0}_{1}.png'.format(self.ship_class,
+                                                                            self.ship_color)
+
+        if self.appearance == self.player_one_choice:
+            self.ships_same = True
+        else:
+            self.ships_same = False
+
         if self.ship_changed is True:
-            self.ship.update_appearance('assets/player_ship/playerShip{0}_{1}.png'.format(self.ship_class,
-                                                                                          self.ship_color))
+            self.ship.update_appearance(self.appearance)
             self.ship_changed = False
 
     def draw(self, screen):
@@ -154,3 +173,6 @@ class CustomisationScene(generic_scene.GenericScene):
         screen.blit(self.title_text, (self.title_text_x, self.title_text_y))
         screen.blit(self.class_text, (self.class_text_x, self.class_text_y))
         screen.blit(self.color_text, (self.color_text_x, self.color_text_y))
+
+        if self.same_tooltip.visible is True:
+            self.same_tooltip.draw(screen)
