@@ -25,23 +25,23 @@ class CustomisationScene(generic_scene.GenericScene):
         # Place a player ship in the middle of the scene
         self.ship = gameplay_items.PlayerShip()
         self.ship.rect.x = 512 - (self.ship.rect.width / 2)
-        self.ship.rect.y = 480
+        self.ship.rect.y = 500
         self.ship_group = pygame.sprite.Group(self.ship)
 
         # Buttons
         # Ship class
-        self.nova_button = ui_items.RectangleHoverButton("Nova", 300, 90, 42, 90)
-        self.nebula_button = ui_items.RectangleHoverButton("Nebula", 300, 90, 362, 90)
-        self.galaxy_button = ui_items.RectangleHoverButton("Galaxy", 300, 90, 682, 90)
+        self.nova_button = ui_items.RectangleHoverButton("Nova", 300, 90, 42, 160)
+        self.nebula_button = ui_items.RectangleHoverButton("Nebula", 300, 90, 362, 160)
+        self.galaxy_button = ui_items.RectangleHoverButton("Galaxy", 300, 90, 682, 160)
 
         # Color
-        self.blue_button = ui_items.RectangleHoverButton("", 90, 90, 302, 310, constants.SHIP_BLUE,
+        self.blue_button = ui_items.RectangleHoverButton("", 90, 90, 302, 370, constants.SHIP_BLUE,
                                                          constants.SHIP_BLUE)
-        self.green_button = ui_items.RectangleHoverButton("", 90, 90, 412, 310, constants.SHIP_GREEN,
+        self.green_button = ui_items.RectangleHoverButton("", 90, 90, 412, 370, constants.SHIP_GREEN,
                                                           constants.SHIP_GREEN)
-        self.orange_button = ui_items.RectangleHoverButton("", 90, 90, 522, 310, constants.SHIP_ORANGE,
+        self.orange_button = ui_items.RectangleHoverButton("", 90, 90, 522, 370, constants.SHIP_ORANGE,
                                                            constants.SHIP_ORANGE)
-        self.red_button = ui_items.RectangleHoverButton("", 90, 90, 632, 310, constants.SHIP_RED,
+        self.red_button = ui_items.RectangleHoverButton("", 90, 90, 632, 370, constants.SHIP_RED,
                                                         constants.SHIP_RED)
 
         # Start
@@ -57,13 +57,28 @@ class CustomisationScene(generic_scene.GenericScene):
 
         # Text
         font = pygame.font.Font(None, 45)
+
+        if self.player_count == 1:
+            self.title_text = font.render("Customise Your Ship!", True, constants.WHITE)
+            self.title_text_x = (1024 / 2) - (self.title_text.get_rect().width / 2)
+            self.title_text_y = 30
+        else:
+            if self.player_choosing == 1:
+                self.title_text = font.render("Player 1 - Customise Your Ship!", True, constants.WHITE)
+                self.title_text_x = (1024 / 2) - (self.title_text.get_rect().width / 2)
+                self.title_text_y = 30
+            elif self.player_choosing == 2:
+                self.title_text = font.render("Player 2 - Customise Your Ship!", True, constants.WHITE)
+                self.title_text_x = (1024 / 2) - (self.title_text.get_rect().width / 2)
+                self.title_text_y = 30
+
         self.class_text = font.render("Ship class", True, constants.WHITE)
         self.class_text_x = (1024 / 2) - (self.class_text.get_rect().width / 2)
-        self.class_text_y = (90 / 2) - (self.class_text.get_rect().height / 2)
+        self.class_text_y = 100
 
         self.color_text = font.render("Ship colour", True, constants.WHITE)
         self.color_text_x = (1024 / 2) - (self.color_text.get_rect().width / 2)
-        self.color_text_y = 220 + (90 / 2) - (self.color_text.get_rect().height / 2)
+        self.color_text_y = 310
 
         # Customisation selections
         self.ship_class = "2"
@@ -136,5 +151,6 @@ class CustomisationScene(generic_scene.GenericScene):
         self.ship_group.draw(screen)
 
         # Text
+        screen.blit(self.title_text, (self.title_text_x, self.title_text_y))
         screen.blit(self.class_text, (self.class_text_x, self.class_text_y))
         screen.blit(self.color_text, (self.color_text_x, self.color_text_y))
