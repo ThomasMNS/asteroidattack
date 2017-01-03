@@ -64,9 +64,6 @@ class GameScene(generic_scene.GenericScene):
             self.player_2.update_pos(500, 600)
             self.all_sprites.add(self.player_2)
 
-        # Creating a container for lasers
-        self.lasers = pygame.sprite.Group()
-
         # Spawn powerups
         self.pups = pygame.sprite.Group()
         # Create a speed powerup
@@ -123,9 +120,7 @@ class GameScene(generic_scene.GenericScene):
                     self.player.x_speed = -self.player.speed
                 # Fire laser
                 elif event.key == pygame.K_SPACE:
-                    if self.player.lasers > 0:
-                        self.lasers.add(gameplay_items.Laser(self, self.player.rect.x + 53, self.player.rect.y + 10))
-                        self.player.lasers -= 1
+                    self.player.fire_laser()
             # Checking for key release
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w or event.key == pygame.K_s:
@@ -136,10 +131,7 @@ class GameScene(generic_scene.GenericScene):
             if self.player_2 is not None:
                 if event.type == pygame.JOYBUTTONDOWN:
                     if event.button == 1:
-                        if self.player_2.lasers > 0:
-                            self.lasers.add(gameplay_items.Laser(self, self.player_2.rect.x + 53,
-                                                                 self.player_2.rect.y + 10))
-                            self.player_2.lasers -= 1
+                        self.player_2.fire_laser()
 
         # Player 2 movement handling
         if self.player_2 is not None:
@@ -184,7 +176,6 @@ class GameScene(generic_scene.GenericScene):
             self.ending_beep.play()
 
         self.all_sprites.update()
-        self.lasers.update()
         self.collectible_stars.update()
         self.aliens.update(self.timer)
 
@@ -199,11 +190,14 @@ class GameScene(generic_scene.GenericScene):
         self.aliens.draw(screen)
         for alien in self.aliens:
             alien.draw_lasers(screen)
-        self.lasers.draw(screen)
         self.all_sprites.draw(screen)
 
         for star in self.top_stars:
             star.draw(screen)
+
+        self.player.lasers_group.draw(screen)
+        if self.player_2 is not None:
+            self.player_2.lasers_group.draw(screen)
 
     def draw_text(self, screen):
         # Top left
