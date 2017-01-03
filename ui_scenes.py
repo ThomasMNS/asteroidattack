@@ -95,6 +95,17 @@ class HighScoresScene(generic_scene.GenericScene):
                                                            constants.DARK_GREY)
         self.clear_button = ui_items.RectangleHoverButton("Clear High-Scores", 300, 90, 522, 640, (constants.DARKER_RED),
                                                           (constants.DARK_GREY))
+
+        self.single_button = ui_items.RectangleHoverButton("Single-Player", 140, 40, 300, 70, color=constants.DARK_GREY,
+                                                           text_size=25)
+
+        self.multi_button = ui_items.RectangleHoverButton("Multi-Player", 140, 40, 450, 70, color=constants.LIGHT_GREY,
+                                                          hover_color=constants.DARK_GREY, text_size=25)
+
+        self.active_scores = "single"
+
+        self.buttons = [self.return_button, self.clear_button, self.single_button, self.multi_button]
+
         self.font = pygame.font.Font(None, 25)
 
         self.confirmation_popup = ui_items.Modal(["Are you sure you want to delete",
@@ -132,17 +143,19 @@ class HighScoresScene(generic_scene.GenericScene):
 
     def update(self):
         if self.show_popup is False:
-            self.clear_button.mouse_on_button(pygame.mouse.get_pos())
-            self.return_button.mouse_on_button(pygame.mouse.get_pos())
+            for button in self.buttons:
+                button.mouse_on_button(pygame.mouse.get_pos())
         else:
             self.confirmation_popup.update(pygame.mouse.get_pos())
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)
-        self.clear_button.draw_button(screen)
-        self.return_button.draw_button(screen)
+        # Highscores section background
+        pygame.draw.rect(screen, constants.DARK_GREY, (300, 110, 420, 480))
+        for button in self.buttons:
+            button.draw_button(screen)
         if self.highscore_list:
-            y = 80
+            y = 160
             rank = 1
             for score in self.highscore_list:
                 if score == self.highscore_to_highlight:
