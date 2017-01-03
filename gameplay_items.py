@@ -27,6 +27,7 @@ class PlayerShip(pygame.sprite.Sprite):
 
         # Weapons
         self.lasers = 5
+        self.lasers_group = pygame.sprite.Group()
 
         # Shield
         self.shield = None
@@ -63,6 +64,12 @@ class PlayerShip(pygame.sprite.Sprite):
             self.collision_detection(self.game_scene.aliens)
             for alien in self.game_scene.aliens:
                 self.collision_detection(alien.lasers)
+
+            # # Check if this is player one
+            # if self.game_scene.player is self:
+            #     # Check if there is a player 2
+            #     if self.game_scene.player_2 is not None:
+            #         self.collision_detection(self.game_scene.player_2.lasers)
 
             # Powerup collision detection
             for pup in self.game_scene.pups:
@@ -128,6 +135,8 @@ class PlayerShip(pygame.sprite.Sprite):
             self.health = 100
             self.alert_played = False
 
+        self.lasers_group.update()
+
     def create_shield(self, sprite_group):
         self.shield = Shield(self)
         self.shield.update_pos(self)
@@ -156,6 +165,11 @@ class PlayerShip(pygame.sprite.Sprite):
                     enemy.collision()
                     self.shield.kill()
                     self.shield = None
+
+    def fire_laser(self):
+        if self.lasers > 0:
+            self.lasers_group.add(Laser(self.game_scene, self.rect.x + 53, self.rect.y + 10))
+            self.lasers -= 1
 
 
 class Shield(pygame.sprite.Sprite):
