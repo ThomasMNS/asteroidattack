@@ -13,12 +13,16 @@ import scene_tools
 class LevelOne(game_scene.GameScene):
     """ Class for the first game level. """
     def __init__(self, ship, ship_2=None):
-        self.score = 0
-        self.lives = 3
 
         self.player = ship
         # If there is only one player, self.player_2 = None
         self.player_2 = ship_2
+
+        self.score = 0
+        if self.player_2 is None:
+            self.lives = 3
+        else:
+            self.lives = 2
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
 
         # Initial Asteroids
