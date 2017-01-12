@@ -115,6 +115,7 @@ class HighScoresScene(generic_scene.GenericScene):
                                                  0, 1024, 768, constants.LIGHT_GREY_2, constants.DARKER_GREY, "OK",
                                                  "Cancel")
         self.show_popup = False
+        self.list_showing = "single"
 
     def handle_events(self, events):
         # If there is no popup, handle events as normal
@@ -125,6 +126,14 @@ class HighScoresScene(generic_scene.GenericScene):
                         self.show_popup = True
                     elif self.return_button.mouse_over is True:
                         self.next_scene = TitleScene()
+                    elif self.single_button.mouse_over is True:
+                        self.list_showing = "single"
+                        self.single_button.color = constants.DARK_GREY
+                        self.multi_button.color = constants.LIGHT_GREY
+                    elif self.multi_button.mouse_over is True:
+                        self.list_showing = "multi"
+                        self.single_button.color = constants.LIGHT_GREY
+                        self.multi_button.color = constants.DARK_GREY
         # If there is a popup, only input relating to the popup should be handled
         elif self.show_popup is True:
             for event in events:
@@ -154,33 +163,36 @@ class HighScoresScene(generic_scene.GenericScene):
         pygame.draw.rect(screen, constants.DARK_GREY, (300, 110, 420, 480))
         for button in self.buttons:
             button.draw_button(screen)
-        if self.highscore_list:
-            y = 160
-            rank = 1
-            for score in self.highscore_list:
-                if score == self.highscore_to_highlight:
-                    color = constants.GREEN
-                else:
-                    color = constants.WHITE
-                rank_text = "{0!s}.".format(rank)
-                rank_render = self.font.render(rank_text, True, color)
-                screen.blit(rank_render, (367, y))
-                name_text = "{0!s}".format(score[0])
-                name_render = self.font.render(name_text, True, color)
-                screen.blit(name_render, (367 + 40, y))
-                score_text = "{0!s}".format(score[1])
-                score_render = self.font.render(score_text, True, color)
-                screen.blit(score_render, (367 + 170, y))
-                date_text = "{0!s}".format(score[2])
-                date_render = self.font.render(date_text, True, color)
-                screen.blit(date_render, (367 + 230, y))
-                y += 40
-                rank += 1
-        else:
-            text = "No high-scores yet! Why don't you play and see how you do?"
-            text_render = self.font.render(text, True, constants.WHITE)
-            screen.blit(text_render, (10, 10))
-
+        if self.list_showing == "single":
+            if self.highscore_list:
+                y = 160
+                rank = 1
+                for score in self.highscore_list:
+                    if score == self.highscore_to_highlight:
+                        color = constants.GREEN
+                    else:
+                        color = constants.WHITE
+                    rank_text = "{0!s}.".format(rank)
+                    rank_render = self.font.render(rank_text, True, color)
+                    screen.blit(rank_render, (367, y))
+                    name_text = "{0!s}".format(score[0])
+                    name_render = self.font.render(name_text, True, color)
+                    screen.blit(name_render, (367 + 40, y))
+                    score_text = "{0!s}".format(score[1])
+                    score_render = self.font.render(score_text, True, color)
+                    screen.blit(score_render, (367 + 170, y))
+                    date_text = "{0!s}".format(score[2])
+                    date_render = self.font.render(date_text, True, color)
+                    screen.blit(date_render, (367 + 230, y))
+                    y += 40
+                    rank += 1
+            else:
+                text = "No high-scores yet! Why don't you play and see how you do?"
+                text_render = self.font.render(text, True, constants.WHITE)
+                screen.blit(text_render, (10, 10))
+        elif self.list_showing == "multi":
+            render = self.font.render("Stuff", True, constants.WHITE)
+            screen.blit(render, (10, 10))
         if self.show_popup is True:
             self.confirmation_popup.draw(screen)
 
