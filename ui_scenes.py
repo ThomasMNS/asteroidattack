@@ -70,11 +70,13 @@ class TitleScene(generic_scene.GenericScene):
 class HighScoresScene(generic_scene.GenericScene):
     """ Displays the contents of asteroid-attack-program-highscores.p and gives the option
     to replace the contents with a blank list. """
-    def __init__(self, highscore_to_highlight=None):
+    def __init__(self, highscore_to_highlight=None, players="single"):
         super().__init__()
         # An item in high_score list may be passed if the previous scene was a game over.
         # This is highlighted in green in the draw method.
         self.highscore_to_highlight = highscore_to_highlight
+        # Is the score to be highlighted single or multiplayer, so the correct tab is opened
+        self.list_showing = players
         # Open the highscores list and store in highscores_list. If there is no highscores file (ie
         # the game has been started for the first time), make a blank list.
         try:
@@ -82,19 +84,40 @@ class HighScoresScene(generic_scene.GenericScene):
             self.highscore_list = pickle.load(f)
             f.close()
         except FileNotFoundError:
-            self.highscore_list = []
+            self.highscore_list = [[], []]
+
+        self.single_highscores = self.highscore_list[0]
+        self.multi_highscores = self.highscore_list[1]
 
         # Sort key to be passed to the sorted function
         def sort_by(item):
             return item[1]
 
-        self.highscore_list = sorted(self.highscore_list, key=sort_by, reverse=True)
+        # Sort the highscores for display
+        self.single_highscores = sorted(self.single_highscores, key=sort_by, reverse=True)
+        self.multi_highscores = sorted(self.multi_highscores, key=sort_by, reverse=True)
 
         # Buttons
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 202, 640, constants.LIGHT_GREY,
                                                            constants.DARK_GREY)
         self.clear_button = ui_items.RectangleHoverButton("Clear High-Scores", 300, 90, 522, 640, (constants.DARKER_RED),
                                                           (constants.DARK_GREY))
+
+        self.single_button = ui_items.RectangleHoverButton("Single-Player", 140, 40, 300, 70, color=constants.DARK_GREY,
+                                                           text_size=25)
+        if self.list_showing == "multi":
+            self.single_button.color = constants.LIGHT_GREY
+            self.single_button.hover_color = constants.DARK_GREY
+
+        self.multi_button = ui_items.RectangleHoverButton("Multi-Player", 140, 40, 450, 70, color=constants.LIGHT_GREY,
+                                                          hover_color=constants.DARK_GREY, text_size=25)
+
+        if self.list_showing == "multi":
+            self.multi_button.color = constants.DARK_GREY
+            self.multi_button.hover_color = constants.LIGHT_GREY
+
+        self.buttons = [self.return_button, self.clear_button, self.single_button, self.multi_button]
+
         self.font = pygame.font.Font(None, 25)
 
         self.confirmation_popup = ui_items.Modal(["Are you sure you want to delete",
@@ -105,6 +128,7 @@ class HighScoresScene(generic_scene.GenericScene):
                                                  "Cancel")
         self.show_popup = False
 
+
     def handle_events(self, events):
         # If there is no popup, handle events as normal
         if self.show_popup is False:
@@ -114,12 +138,20 @@ class HighScoresScene(generic_scene.GenericScene):
                         self.show_popup = True
                     elif self.return_button.mouse_over is True:
                         self.next_scene = TitleScene()
+                    elif self.single_button.mouse_over is True:
+                        self.list_showing = "single"
+                        self.single_button.color = constants.DARK_GREY
+                        self.multi_button.color = constants.LIGHT_GREY
+                    elif self.multi_button.mouse_over is True:
+                        self.list_showing = "multi"
+                        self.single_button.color = constants.LIGHT_GREY
+                        self.multi_button.color = constants.DARK_GREY
         # If there is a popup, only input relating to the popup should be handled
         elif self.show_popup is True:
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.confirmation_popup.button_1.mouse_over is True:
-                        self.highscore_list = []
+                        self.highscore_list = [[], []]
                         try:
                             f = open('asteroid-attack-program-highscores.p', 'wb')
                             pickle.dump(self.highscore_list, f)
@@ -132,42 +164,69 @@ class HighScoresScene(generic_scene.GenericScene):
 
     def update(self):
         if self.show_popup is False:
-            self.clear_button.mouse_on_button(pygame.mouse.get_pos())
-            self.return_button.mouse_on_button(pygame.mouse.get_pos())
+            for button in self.buttons:
+                button.mouse_on_button(pygame.mouse.get_pos())
         else:
             self.confirmation_popup.update(pygame.mouse.get_pos())
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)
-        self.clear_button.draw_button(screen)
-        self.return_button.draw_button(screen)
-        if self.highscore_list:
-            y = 80
-            rank = 1
-            for score in self.highscore_list:
-                if score == self.highscore_to_highlight:
-                    color = constants.GREEN
-                else:
-                    color = constants.WHITE
-                rank_text = "{0!s}.".format(rank)
-                rank_render = self.font.render(rank_text, True, color)
-                screen.blit(rank_render, (367, y))
-                name_text = "{0!s}".format(score[0])
-                name_render = self.font.render(name_text, True, color)
-                screen.blit(name_render, (367 + 40, y))
-                score_text = "{0!s}".format(score[1])
-                score_render = self.font.render(score_text, True, color)
-                screen.blit(score_render, (367 + 170, y))
-                date_text = "{0!s}".format(score[2])
-                date_render = self.font.render(date_text, True, color)
-                screen.blit(date_render, (367 + 230, y))
-                y += 40
-                rank += 1
-        else:
-            text = "No high-scores yet! Why don't you play and see how you do?"
-            text_render = self.font.render(text, True, constants.WHITE)
-            screen.blit(text_render, (10, 10))
-
+        # Highscores section background
+        pygame.draw.rect(screen, constants.DARK_GREY, (300, 110, 420, 480))
+        for button in self.buttons:
+            button.draw_button(screen)
+        if self.list_showing == "single":
+            if len(self.single_highscores) > 0:
+                y = 160
+                rank = 1
+                for score in self.single_highscores:
+                    if score == self.highscore_to_highlight:
+                        color = constants.GREEN
+                    else:
+                        color = constants.WHITE
+                    rank_text = "{0!s}.".format(rank)
+                    rank_render = self.font.render(rank_text, True, color)
+                    screen.blit(rank_render, (367, y))
+                    name_text = "{0!s}".format(score[0])
+                    name_render = self.font.render(name_text, True, color)
+                    screen.blit(name_render, (367 + 40, y))
+                    score_text = "{0!s}".format(score[1])
+                    score_render = self.font.render(score_text, True, color)
+                    screen.blit(score_render, (367 + 170, y))
+                    date_text = "{0!s}".format(score[2])
+                    date_render = self.font.render(date_text, True, color)
+                    screen.blit(date_render, (367 + 230, y))
+                    y += 40
+                    rank += 1
+            else:
+                scene_tools.multiline_text(["No high-scores yet!", "Why don't you play and see how you do?"],
+                                           340, 160, screen, constants.WHITE, 25)
+        elif self.list_showing == "multi":
+            if len(self.multi_highscores) > 0:
+                y = 160
+                rank = 1
+                for score in self.multi_highscores:
+                    if score == self.highscore_to_highlight:
+                        color = constants.GREEN
+                    else:
+                        color = constants.WHITE
+                    rank_text = "{0!s}.".format(rank)
+                    rank_render = self.font.render(rank_text, True, color)
+                    screen.blit(rank_render, (367, y))
+                    name_text = "{0!s}".format(score[0])
+                    name_render = self.font.render(name_text, True, color)
+                    screen.blit(name_render, (367 + 40, y))
+                    score_text = "{0!s}".format(score[1])
+                    score_render = self.font.render(score_text, True, color)
+                    screen.blit(score_render, (367 + 170, y))
+                    date_text = "{0!s}".format(score[2])
+                    date_render = self.font.render(date_text, True, color)
+                    screen.blit(date_render, (367 + 230, y))
+                    y += 40
+                    rank += 1
+            else:
+                scene_tools.multiline_text(["No high-scores yet!", "Why don't you play and see how you do?"],
+                                           340, 160, screen, constants.WHITE, 25)
         if self.show_popup is True:
             self.confirmation_popup.draw(screen)
 
@@ -195,7 +254,7 @@ class GameModeSelectionScene(generic_scene.GenericScene):
             # Checking for clicks on buttons
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.campaign_button.mouse_over is True:
-                    self.next_scene = customisation_scene.CustomisationScene("campaign")
+                    self.next_scene = PlayerNumberScene()
                 elif self.training_button.mouse_over is True:
                     self.next_scene = customisation_scene.CustomisationScene("training")
                 elif self.return_button.mouse_over is True:
@@ -217,6 +276,60 @@ class GameModeSelectionScene(generic_scene.GenericScene):
 
         scene_tools.multiline_text(["Test your skills by creating", "your own customised",
                                                          "training simulation"], 665, 385, screen, constants.WHITE, 30)
+
+
+class PlayerNumberScene(generic_scene.GenericScene):
+    """ A class for a screen with buttons allowing the player to select single or multi-player mode. """
+    def __init__(self):
+        super().__init__()
+
+        # Check if there is a joystick connected. To be used to check whether multiplaer can be selected.
+        self.joystick_count = pygame.joystick.get_count()
+        if self.joystick_count >= 1:
+            self.joystick_connected = True
+        else:
+            self.joystick_connected = False
+
+        self.single_button = ui_items.RectangleHoverButton("One Player", 300, 90, 362, 400)
+        if self.joystick_connected is True:
+            self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500)
+        else:
+            # If there is no joystick, display as greyed out
+            self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500, color=constants.DARK_GREY)
+        self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 600)
+        self.buttons = [self.single_button, self.multi_button, self.return_button]
+
+        # Tooltip
+        self.multi_tip = ui_items.Tooltip(["No joystick", "detected"], 130, 70)
+
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN and self.single_button.mouse_over is True:
+                self.next_scene = customisation_scene.CustomisationScene("campaign", 1)
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.multi_button.mouse_over is True:
+                if self.joystick_connected is True:
+                    self.next_scene = customisation_scene.CustomisationScene("campaign", 2, 1)
+                else:
+                    pass
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
+                self.next_scene = GameModeSelectionScene()
+
+    def update(self):
+        for button in self.buttons:
+            button.mouse_on_button(pygame.mouse.get_pos())
+        self.multi_tip.update()
+
+        if self.multi_button.mouse_over is True:
+            self.multi_tip.visible = True
+        else:
+            self.multi_tip.visible = False
+
+    def draw(self, screen):
+        screen.fill(constants.DARKER_GREY)
+        for button in self.buttons:
+            button.draw_button(screen)
+        if self.multi_tip.visible is True and self.joystick_connected is False:
+            self.multi_tip.draw(screen)
 
 
 class TrainingSetupScene(generic_scene.GenericScene):
@@ -421,11 +534,12 @@ class AcknowledgementsScene(generic_scene.GenericScene):
 
 class GetReadyScene(generic_scene.GenericScene):
     """ Displayed before Level 1 begins to give the player a moment to prepare."""
-    def __init__(self, mode, ship, choices=None):
+    def __init__(self, mode, ship, ship_2=None, choices=None):
         super().__init__()
         self.mode = mode
         self.choices = choices
         self.ship = ship
+        self.ship_2 = ship_2
 
         self.font = pygame.font.Font(None, 190)
         self.get_ready_text = "Get ready!"
@@ -440,7 +554,7 @@ class GetReadyScene(generic_scene.GenericScene):
         self.timer += 1
         if self.timer > 240:
             if self.mode == "campaign":
-                self.next_scene = level_1.LevelOne(self.ship)
+                self.next_scene = level_1.LevelOne(self.ship, self.ship_2)
             elif self.mode == "training":
                 self.next_scene = training_scene.TrainingScene(self.ship, self.choices)
 
@@ -451,14 +565,14 @@ class GetReadyScene(generic_scene.GenericScene):
 
 class LevelCompleteScene(generic_scene.GenericScene):
     """ Displayed between levels. Shows the player's score and gives them a chance to prepare. """
-    def __init__(self, ship, score, lives, health, level):
+    def __init__(self, ship, ship_2, score, lives, level):
         super().__init__()
         self.score = score
         self.lives = lives
-        self.health = health
         self.level = level
         self.timer = 0
         self.player = ship
+        self.player_2 = ship_2
 
         self.font = pygame.font.Font(None, 150)
         self.smaller_font = pygame.font.Font(None, 60)
@@ -478,7 +592,7 @@ class LevelCompleteScene(generic_scene.GenericScene):
     def update(self):
         self.timer += 1
         if self.timer > 240:
-            self.next_scene = self.level(self.player, self.score, self.lives, self.health)
+            self.next_scene = self.level(self.player, self.player_2, self.score, self.lives)
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)
@@ -491,44 +605,54 @@ class GameOverScene(generic_scene.GenericScene):
     """ Reads the highscores and allows the user to enter a name for their
     highscore entry if they are in the top 10. Displays game over or congrats depending on what is passed
     to the constructor. """
-    def __init__(self, score, game_over_type):
+    def __init__(self, score, game_over_type, player_2):
         super().__init__()
         self.score = score
         self.type = game_over_type
-        self.newly_created_high_scores = False
+        if player_2 is None:
+            self.players = "single"
+        else:
+            self.players = "multi"
         try:
             f = open('asteroid-attack-program-highscores.p', 'rb')
             self.high_scores_list = pickle.load(f)
             f.close()
-            self.newly_created_high_scores = False
         except FileNotFoundError:
             f = open('asteroid-attack-program-highscores.p', 'wb')
             f.close()
-            self.high_scores_list = []
-            self.newly_created_high_scores = True
+            self.high_scores_list = [[], []]
         except EOFError:
-            self.high_scores_list = []
-            self.newly_created_high_scores = True
+            self.high_scores_list = [[], []]
 
+        # Sort by score (second item)
         def sort_by(item):
             return item[1]
 
-        # Highscores, sorted in descending order
-        self.high_scores_list = sorted(self.high_scores_list, key=sort_by, reverse=True)
+        if self.players == "single":
+            # If it's a single player game that has just finished, sort the first list in self.high_scores_list
+            # which is for single player
+            self.high_scores_list[0] = sorted(self.high_scores_list[0], key=sort_by, reverse=True)
+            # Set self.high_scores_mod, which will be manipulated
+            self.high_scores_mod = self.high_scores_list[0]
+        else:
+            # Otherwise, sort the second list, which is for multiplayer
+            self.high_scores_list[1] = sorted(self.high_scores_list[1], key=sort_by, reverse=True)
+            # Set self.high_scores_mod
+            self.high_scores_mod = self.high_scores_list[1]
 
         # Find the lowest highscore
-        if self.newly_created_high_scores is True:
-            lowest_highscore = 0
-        elif len(self.high_scores_list) == 0:
-            lowest_highscore = 0
+        if len(self.high_scores_mod) == 0:
+            # No high scores, so lowest is zero
+            lowest_high_score = 0
         else:
-            lowest_highscore = self.high_scores_list[len(self.high_scores_list) - 1][1]
+            # Otherwise, the last score in the list
+            lowest_high_score = self.high_scores_mod[len(self.high_scores_mod) - 1][1]
 
         # Find out of the score is a highscore
-        if (self.score > lowest_highscore) or (len(self.high_scores_list) < 10):
-            self.new_highscore = True
+        if (self.score > lowest_high_score) or (len(self.high_scores_mod) < 10):
+            self.new_high_score = True
         else:
-            self.new_highscore = False
+            self.new_high_score = False
 
         self.font = pygame.font.Font(None, 150)
         self.font_smaller = pygame.font.Font(None, 55)
@@ -547,7 +671,7 @@ class GameOverScene(generic_scene.GenericScene):
         self.score_rect = score_rect.width
         self.score_x = (1024 / 2) - (self.score_rect / 2)
 
-        if self.new_highscore is True:
+        if self.new_high_score is True:
             self.congratulations_text = "Congratulations! New high-score!"
             self.congratulations_render = self.font_smallest.render(self.congratulations_text, True, constants.WHITE)
             self.textbox = eztext.Input(maxlength = 20, color=constants.WHITE, prompt="Name: ", font=self.font_smallest)
@@ -563,28 +687,36 @@ class GameOverScene(generic_scene.GenericScene):
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over == True:
-                if self.new_highscore is True:
+                if self.new_high_score is True:
                     self.update_score()
-                    self.next_scene = HighScoresScene(self.score)
+                    self.next_scene = HighScoresScene(self.score, self.players)
                 else:
                     self.next_scene = TitleScene()
-        if self.new_highscore is True:
+                    print("Not a new high score, going to titles")
+        if self.new_high_score is True:
             self.textbox.update(events)
 
     def update(self):
         self.return_button.mouse_on_button(pygame.mouse.get_pos())
-        if self.new_highscore is True:
+        if self.new_high_score is True:
             self.name = self.textbox.value
 
     def update_score(self):
+        """ Called if there is a new high score"""
         if len(self.name) == 0:
             self.name = "Unknown"
-        self.score = [self.name, self.score, datetime.date.today().strftime("%x")]
-        self.high_scores_list = self.high_scores_list[:9]
-        self.high_scores_list.append(self.score)
+        # Create a list to store name, score and date
+        self.score = [self.name, self.score, datetime.date.today().strftime("%d / %m / %Y")]
+        # Cut off the last high score, since a new one is being added
+        self.high_scores_mod = self.high_scores_mod[:9]
+        self.high_scores_mod.append(self.score)
+        if self.players == "single":
+            new_high_scores = [self.high_scores_mod, self.high_scores_list[1]]
+        else:
+            new_high_scores = [self.high_scores_list[0], self.high_scores_mod]
         try:
             f = open('asteroid-attack-program-highscores.p', 'wb')
-            pickle.dump(self.high_scores_list, f)
+            pickle.dump(new_high_scores, f)
             f.close()
         except:
             pass
@@ -594,7 +726,7 @@ class GameOverScene(generic_scene.GenericScene):
         screen.blit(self.game_over_render, (self.game_over_x, 30))
         screen.blit(self.score_render, (self.score_x, 150))
         self.return_button.draw_button(screen)
-        if self.new_highscore is True:
+        if self.new_high_score is True:
             screen.blit(self.congratulations_render, (30, 300))
             self.textbox.draw(screen)
 

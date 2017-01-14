@@ -13,35 +13,45 @@ import test_level
 
 class CustomisationScene(generic_scene.GenericScene):
     """ Class for a scene allowing players to change the appearance of their ship. """
-    def __init__(self, next_level):
+    def __init__(self, next_level, player_count, player_choosing=None, player_one=None, player_one_choice=None):
         super().__init__()
 
+        self.player_choosing = player_choosing
+        self.player_one = player_one
+
         self.next_level = next_level
+        self.player_count = player_count
+
+        self.player_one_choice = player_one_choice
 
         # Place a player ship in the middle of the scene
         self.ship = gameplay_items.PlayerShip()
         self.ship.rect.x = 512 - (self.ship.rect.width / 2)
-        self.ship.rect.y = 480
+        self.ship.rect.y = 500
         self.ship_group = pygame.sprite.Group(self.ship)
 
         # Buttons
         # Ship class
-        self.nova_button = ui_items.RectangleHoverButton("Nova", 300, 90, 42, 90)
-        self.nebula_button = ui_items.RectangleHoverButton("Nebula", 300, 90, 362, 90)
-        self.galaxy_button = ui_items.RectangleHoverButton("Galaxy", 300, 90, 682, 90)
+        self.nova_button = ui_items.RectangleHoverButton("Nova", 300, 90, 42, 160)
+        self.nebula_button = ui_items.RectangleHoverButton("Nebula", 300, 90, 362, 160)
+        self.galaxy_button = ui_items.RectangleHoverButton("Galaxy", 300, 90, 682, 160)
 
         # Color
-        self.blue_button = ui_items.RectangleHoverButton("", 90, 90, 302, 310, constants.SHIP_BLUE,
+        self.blue_button = ui_items.RectangleHoverButton("", 90, 90, 302, 370, constants.SHIP_BLUE,
                                                          constants.SHIP_BLUE)
-        self.green_button = ui_items.RectangleHoverButton("", 90, 90, 412, 310, constants.SHIP_GREEN,
+        self.green_button = ui_items.RectangleHoverButton("", 90, 90, 412, 370, constants.SHIP_GREEN,
                                                           constants.SHIP_GREEN)
-        self.orange_button = ui_items.RectangleHoverButton("", 90, 90, 522, 310, constants.SHIP_ORANGE,
+        self.orange_button = ui_items.RectangleHoverButton("", 90, 90, 522, 370, constants.SHIP_ORANGE,
                                                            constants.SHIP_ORANGE)
-        self.red_button = ui_items.RectangleHoverButton("", 90, 90, 632, 310, constants.SHIP_RED,
+        self.red_button = ui_items.RectangleHoverButton("", 90, 90, 632, 370, constants.SHIP_RED,
                                                         constants.SHIP_RED)
 
         # Start
-        self.start_button = ui_items.RectangleHoverButton("Start", 300, 90, 362, 640)
+        if self.player_count == 2 and self.player_choosing == 1:
+            start_txt = "Continue"
+        else:
+            start_txt = "Start"
+        self.start_button = ui_items.RectangleHoverButton(start_txt, 300, 90, 362, 640)
 
         self.buttons = [self.nova_button, self.nebula_button, self.galaxy_button,
                         self.blue_button, self.green_button, self.orange_button, self.red_button,
@@ -49,18 +59,37 @@ class CustomisationScene(generic_scene.GenericScene):
 
         # Text
         font = pygame.font.Font(None, 45)
+
+        if self.player_count == 1:
+            self.title_text = font.render("Customise Your Ship!", True, constants.WHITE)
+            self.title_text_x = (1024 / 2) - (self.title_text.get_rect().width / 2)
+            self.title_text_y = 30
+        else:
+            if self.player_choosing == 1:
+                self.title_text = font.render("Player 1 - Customise Your Ship!", True, constants.WHITE)
+                self.title_text_x = (1024 / 2) - (self.title_text.get_rect().width / 2)
+                self.title_text_y = 30
+            elif self.player_choosing == 2:
+                self.title_text = font.render("Player 2 - Customise Your Ship!", True, constants.WHITE)
+                self.title_text_x = (1024 / 2) - (self.title_text.get_rect().width / 2)
+                self.title_text_y = 30
+
         self.class_text = font.render("Ship class", True, constants.WHITE)
         self.class_text_x = (1024 / 2) - (self.class_text.get_rect().width / 2)
-        self.class_text_y = (90 / 2) - (self.class_text.get_rect().height / 2)
+        self.class_text_y = 100
 
         self.color_text = font.render("Ship colour", True, constants.WHITE)
         self.color_text_x = (1024 / 2) - (self.color_text.get_rect().width / 2)
-        self.color_text_y = 220 + (90 / 2) - (self.color_text.get_rect().height / 2)
+        self.color_text_y = 310
 
         # Customisation selections
         self.ship_class = "2"
-        self.ship_color = "red"
+        self.ship_color = "blue"
         self.ship_changed = False
+
+        self.ships_same = False
+        self.same_tooltip = ui_items.Tooltip(["Both ships have the same appearance!",
+                                              "This could make things confusing."], 400, 75)
 
     def handle_events(self, events):
         for event in events:
@@ -90,10 +119,18 @@ class CustomisationScene(generic_scene.GenericScene):
                 self.ship_changed = True
             # Start
             elif event.type == pygame.MOUSEBUTTONDOWN and self.start_button.mouse_over is True:
-                if self.next_level == "campaign":
-                    self.next_scene = ui_scenes.GetReadyScene("campaign", self.ship)
-                elif self.next_level == "training":
-                    self.next_scene = ui_scenes.TrainingSetupScene(self.ship)
+                if self.player_count == 1:
+                    if self.next_level == "campaign":
+                        self.next_scene = ui_scenes.GetReadyScene("campaign", self.ship)
+                    elif self.next_level == "training":
+                        self.next_scene = ui_scenes.TrainingSetupScene(self.ship)
+                if self.player_count == 2:
+                    if self.player_choosing == 1:
+                        if self.next_level == "campaign":
+                            self.next_scene = CustomisationScene("campaign", 2, 2, self.ship, self.appearance)
+                    elif self.player_choosing == 2:
+                        if self.next_level == "campaign":
+                            self.next_scene = ui_scenes.GetReadyScene("campaign", self.player_one, self.ship)
             # Testing
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
@@ -103,9 +140,22 @@ class CustomisationScene(generic_scene.GenericScene):
         for button in self.buttons:
             button.mouse_on_button(pygame.mouse.get_pos())
 
+        self.same_tooltip.update()
+        if self.ships_same is True and self.start_button.mouse_over is True:
+            self.same_tooltip.visible = True
+        else:
+            self.same_tooltip.visible = False
+
+        self.appearance = 'assets/player_ship/playerShip{0}_{1}.png'.format(self.ship_class,
+                                                                            self.ship_color)
+
+        if self.appearance == self.player_one_choice:
+            self.ships_same = True
+        else:
+            self.ships_same = False
+
         if self.ship_changed is True:
-            self.ship.update_appearance('assets/player_ship/playerShip{0}_{1}.png'.format(self.ship_class,
-                                                                                          self.ship_color))
+            self.ship.update_appearance(self.appearance)
             self.ship_changed = False
 
     def draw(self, screen):
@@ -120,5 +170,9 @@ class CustomisationScene(generic_scene.GenericScene):
         self.ship_group.draw(screen)
 
         # Text
+        screen.blit(self.title_text, (self.title_text_x, self.title_text_y))
         screen.blit(self.class_text, (self.class_text_x, self.class_text_y))
         screen.blit(self.color_text, (self.color_text_x, self.color_text_y))
+
+        if self.same_tooltip.visible is True:
+            self.same_tooltip.draw(screen)

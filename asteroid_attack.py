@@ -4,6 +4,7 @@ and runs the main game loop. """
 # Asteroid Attack - a scrolling space shooter
 # Thomas Burke - thomasmns.com
 # 14/11/2016
+# V1.1 18/12/2016
 
 # Importing required modules
 # Pygame

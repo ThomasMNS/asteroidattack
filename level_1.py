@@ -12,12 +12,17 @@ import scene_tools
 
 class LevelOne(game_scene.GameScene):
     """ Class for the first game level. """
-    def __init__(self, ship):
-        self.score = 0
-        self.lives = 3
-        self.health = 100
+    def __init__(self, ship, ship_2=None):
+
         self.player = ship
-        self.player.game_scene = self
+        # If there is only one player, self.player_2 = None
+        self.player_2 = ship_2
+
+        self.score = 0
+        if self.player_2 is None:
+            self.lives = 3
+        else:
+            self.lives = 2
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
 
         # Initial Asteroids
@@ -34,11 +39,11 @@ class LevelOne(game_scene.GameScene):
                                        argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.score, self.lives, self.health,
+            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
                                                            level_2.LevelTwo)
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose")
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
 
     def draw(self, screen):
         super().draw(screen)

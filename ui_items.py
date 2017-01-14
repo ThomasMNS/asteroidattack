@@ -51,6 +51,9 @@ class RectangleHoverButton(Button):
         super().__init__(text, width, height, x, y, text_size)
         self.color = color
         self.hover_color = hover_color
+        self.sound = pygame.mixer.Sound('music/button.ogg')
+        self.sound.set_volume(0.1)
+        self.sound_played = False
 
     def draw_button(self, screen):
         if self.mouse_over is True:
@@ -59,6 +62,14 @@ class RectangleHoverButton(Button):
             color = self.color
         pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
         super().draw_button(screen)
+
+    def mouse_on_button(self, mouse_pos):
+        super().mouse_on_button(mouse_pos)
+        if self.mouse_over is True and self.sound_played is False:
+            self.sound.play()
+            self.sound_played = True
+        if self.mouse_over is False:
+            self.sound_played = False
 
 
 class Popup:
@@ -84,7 +95,24 @@ class Popup:
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.bg_color, (self.x, self.y, self.width, self.height))
-        scene_tools.multiline_text(self.text, self.x + 10, self.y + 50, screen, constants.WHITE, 35)
+        scene_tools.multiline_text(self.text, self.x + 10, self.y + 10, screen, constants.WHITE, 30)
+
+
+class Tooltip(Popup):
+    """ A coloured box that displays some text. Positioned next to the mouse cursor."""
+    def __init__(self, text, width, height, bg_color=constants.LIGHT_GREY_2):
+        x = pygame.mouse.get_pos()[0]
+        y = pygame.mouse.get_pos()[1]
+        super().__init__(text, width, height, x, y, bg_color=bg_color)
+        self.visible = False
+
+    def update(self):
+        self.x = pygame.mouse.get_pos()[0]
+        self.y = pygame.mouse.get_pos()[1]
+
+    def draw(self, screen):
+        if self.visible is True:
+            super().draw(screen)
 
 
 class Modal(Popup):

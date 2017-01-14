@@ -12,8 +12,9 @@ import level_5
 
 class LevelFour(game_scene.GameScene):
     """ Class for level 4. """
-    def __init__(self, ship, score, lives, health):
+    def __init__(self, ship, ship_2, score, lives):
         self.player = ship
+        self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/dark_blue_stars.png').convert())
 
         # Fill it with brown asteroids
@@ -32,7 +33,6 @@ class LevelFour(game_scene.GameScene):
 
         self.score = score
         self.lives = lives
-        self.health = health
 
     def handle_events(self, events):
         super().handle_events(events)
@@ -54,11 +54,11 @@ class LevelFour(game_scene.GameScene):
         scene_tools.add_falling_object(self.timer, 1800, gameplay_items.Alien, self.aliens, argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.player,
-                                                           self.score, self.lives, self.health, level_5.LevelFive)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
+                                                           level_5.LevelFive)
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose")
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
 
     def draw(self, screen):
         super().draw(screen)

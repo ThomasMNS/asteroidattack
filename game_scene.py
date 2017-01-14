@@ -18,12 +18,10 @@ class GameScene(generic_scene.GenericScene):
     def __init__(self, background_image):
         super().__init__()
         self.player.game_scene = self
+        if self.player_2 is not None:
+            self.player_2.game_scene = self
         pygame.mouse.set_visible(False)
 
-        # Setting up the game stats
-        self.score = 0
-        self.lives = 3
-        self.health = 100
         # Text and scores
         self.score_font = pygame.font.Font(None, 25)
         self.timer = 0
@@ -62,8 +60,9 @@ class GameScene(generic_scene.GenericScene):
         # Create a player ship object, and place near the bottom of the screen
         self.player.update_pos(50, 600)
         self.all_sprites.add(self.player)
-        # Creating a container for lasers
-        self.lasers = pygame.sprite.Group()
+        if self.player_2 is not None:
+            self.player_2.update_pos(500, 600)
+            self.all_sprites.add(self.player_2)
 
         # Spawn powerups
         self.pups = pygame.sprite.Group()
@@ -99,9 +98,15 @@ class GameScene(generic_scene.GenericScene):
         # Level ending beep
         self.ending_beep = pygame.mixer.Sound('music/zap.ogg')
 
+        # Player 2 handling
+        self.joystick_count = pygame.joystick.get_count()
+        if self.joystick_count >= 1:
+            self.my_joystick = pygame.joystick.Joystick(0)
+            self.my_joystick.init()
+
     def handle_events(self, events):
         for event in events:
-            # Ship keyboard controls
+            # Ship 1 keyboard controls
             # Checking for key press
             if event.type == pygame.KEYDOWN:
                 # Movement
@@ -115,15 +120,37 @@ class GameScene(generic_scene.GenericScene):
                     self.player.x_speed = -self.player.speed
                 # Fire laser
                 elif event.key == pygame.K_SPACE:
-                    if self.player.lasers > 0:
-                        self.lasers.add(gameplay_items.Laser(self, self.player.rect.x + 53, self.player.rect.y + 10))
-                        self.player.lasers -= 1
+                    self.player.fire_laser()
             # Checking for key release
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w or event.key == pygame.K_s:
                     self.player.y_speed = 0
                 elif event.key == pygame.K_a or event.key == pygame.K_d:
                     self.player.x_speed = 0
+            # Player 2 firing
+            if self.player_2 is not None:
+                if event.type == pygame.JOYBUTTONDOWN:
+                    if event.button == 1:
+                        self.player_2.fire_laser()
+
+        # Player 2 movement handling
+        if self.player_2 is not None:
+            # Movement
+            horiz_axis_pos = self.my_joystick.get_axis(0)
+            vert_axis_pos = self.my_joystick.get_axis(1)
+            if vert_axis_pos < -0.5:
+                self.player_2.y_speed = -self.player_2.speed
+            elif vert_axis_pos > 0.5:
+                self.player_2.y_speed = self.player_2.speed
+            else:
+                self.player_2.y_speed = 0
+
+            if horiz_axis_pos < -0.5:
+                self.player_2.x_speed = -self.player_2.speed
+            elif horiz_axis_pos > 0.5:
+                self.player_2.x_speed = self.player_2.speed
+            else:
+                self.player_2.x_speed = 0
 
     def update(self):
         self.timer += 1
@@ -144,20 +171,11 @@ class GameScene(generic_scene.GenericScene):
         for star in self.top_stars:
             star.update_pos()
 
-        # Death
-        if self.health <= 0:
-            self.lives -= 1
-            self.all_sprites.add(gameplay_items.Explosion(self.player.rect.x, self.player.rect.y, self.images))
-            scene_tools.death_scene_reset([self.asteroids, self.pups, self.collectible_stars], self.player)
-            self.health = 100
-            self.player.alert_played = False
-
         # Level ending beeps
         if self.timer == 4700 or self.timer == 4760 or self.timer == 4820 or self.timer == 4880 or self.timer == 4940:
             self.ending_beep.play()
 
         self.all_sprites.update()
-        self.lasers.update()
         self.collectible_stars.update()
         self.aliens.update(self.timer)
 
@@ -172,11 +190,14 @@ class GameScene(generic_scene.GenericScene):
         self.aliens.draw(screen)
         for alien in self.aliens:
             alien.draw_lasers(screen)
-        self.lasers.draw(screen)
         self.all_sprites.draw(screen)
 
         for star in self.top_stars:
             star.draw(screen)
+
+        self.player.lasers_group.draw(screen)
+        if self.player_2 is not None:
+            self.player_2.lasers_group.draw(screen)
 
     def draw_text(self, screen):
         # Top left
@@ -186,27 +207,81 @@ class GameScene(generic_scene.GenericScene):
         score_text = "Score: {0!s}".format(self.score)
         score_render = self.score_font.render(score_text, True, constants.WHITE)
         screen.blit(score_render, (10, 40))
-        health_text = "Health: {0!s}".format(self.health)
+        if self.player_2 is None:
+            health_text = "Health: {0!s}".format(self.player.health)
+        else:
+            health_text = "Player 1 Health: {0!s}".format(self.player.health)
         health_render = self.score_font.render(health_text, True, constants.WHITE)
         screen.blit(health_render, (10, 70))
-        lives_text = "Lives: {0!s}".format(self.lives)
-        lives_render = self.score_font.render(lives_text, True, constants.WHITE)
-        screen.blit(lives_render, (10, 100))
+        # Lives at bottom if no player 2
+        if self.player_2 is None:
+            lives_text = "Lives: {0!s}".format(self.lives)
+            lives_render = self.score_font.render(lives_text, True, constants.WHITE)
+            screen.blit(lives_render, (10, 100))
+        # Display player 2 health if present
+        if self.player_2 is not None:
+            health_text_2 = "Player 2 Health: {0!s}".format(self.player_2.health)
+            health_render_2 = self.score_font.render(health_text_2, True, constants.WHITE)
+            screen.blit(health_render_2, (10, 100))
+            lives_text = "Lives: {0!s}".format(self.lives)
+            lives_render = self.score_font.render(lives_text, True, constants.WHITE)
+            screen.blit(lives_render, (10, 130))
         # Bottom left
-        if self.player.speed_boosted is True:
-            speed_boost_render = self.score_font.render("Speed boosted!", True, constants.WHITE)
-            screen.blit(speed_boost_render, (10, 680))
+        if self.player_2 is None:
+            if self.player.speed_boosted is True:
+                speed_boost_render = self.score_font.render("Speed boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 680))
+        else:
+            if self.player.speed_boosted is True and self.player_2.speed_boosted is False:
+                speed_boost_render = self.score_font.render("Player 1 Speed Boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 620))
+            elif self.player.speed_boosted is False and self.player_2.speed_boosted is True:
+                speed_boost_render = self.score_font.render("Player 2 Speed Boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 620))
+            elif self.player.speed_boosted is True and self.player_2.speed_boosted is True:
+                speed_boost_render = self.score_font.render("Player 1 Speed Boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 590))
+
+                speed_boost_render = self.score_font.render("Player 2 Speed Boosted!", True, constants.WHITE)
+                screen.blit(speed_boost_render, (10, 620))
+
         x_speed = self.player.x_speed
         y_speed = self.player.y_speed
         if y_speed < 0:
             y_speed = abs(y_speed)
         elif y_speed > 0:
             y_speed = - y_speed
-        speed_text = "Ship speed: {0!s} / {1!s}".format(int(y_speed), int(x_speed))
-        speed_render = self.score_font.render(speed_text, True, constants.WHITE)
-        screen.blit(speed_render, (10, 710))
-        lasers_text = "Laser charges remaining: {0!s}".format(self.player.lasers)
-        lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
-        screen.blit(lasers_render, (10, 740))
+        if self.player_2 is None:
+            speed_text = "Ship Speed: {0!s} / {1!s}".format(int(y_speed), int(x_speed))
+            speed_render = self.score_font.render(speed_text, True, constants.WHITE)
+            screen.blit(speed_render, (10, 710))
+        else:
+            speed_text = "Player 1 Speed: {0!s} / {1!s}".format(int(y_speed), int(x_speed))
+            speed_render = self.score_font.render(speed_text, True, constants.WHITE)
+            screen.blit(speed_render, (10, 650))
+
+            x_speed = self.player_2.x_speed
+            y_speed = self.player_2.y_speed
+            if y_speed < 0:
+                y_speed = abs(y_speed)
+            elif y_speed > 0:
+                y_speed = - y_speed
+
+            speed_text = "Player 2 Speed: {0!s} / {1!s}".format(int(y_speed), int(x_speed))
+            speed_render = self.score_font.render(speed_text, True, constants.WHITE)
+            screen.blit(speed_render, (10, 680))
+
+        if self.player_2 is None:
+            lasers_text = "Laser Charges: {0!s}".format(self.player.lasers)
+            lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
+            screen.blit(lasers_render, (10, 740))
+        else:
+            lasers_text = "Player 1 Laser Charges: {0!s}".format(self.player.lasers)
+            lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
+            screen.blit(lasers_render, (10, 710))
+
+            lasers_text = "Player 2 Laser Charges: {0!s}".format(self.player_2.lasers)
+            lasers_render = self.score_font.render(lasers_text, True, constants.WHITE)
+            screen.blit(lasers_render, (10, 740))
 
 
