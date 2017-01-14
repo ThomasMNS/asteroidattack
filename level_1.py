@@ -43,7 +43,7 @@ class LevelOne(game_scene.GameScene):
                                                            level_2.LevelTwo)
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose")
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
 
     def draw(self, screen):
         super().draw(screen)

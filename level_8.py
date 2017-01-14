@@ -67,11 +67,17 @@ class LevelEight(game_scene.GameScene):
         scene_tools.add_falling_object(self.timer, 1800, gameplay_items.StrongAsteroid, self.all_sprites,
                                        self.asteroids, argument=self)
 
+        # Single or multiplayer (for highscores)
+        if self.player_2 is None:
+            players = "single"
+        else:
+            players = "multi"
+
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose")
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", players)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "win")
+            self.next_scene = ui_scenes.GameOverScene(self.score, "win", players)
 
     def draw(self, screen):
         super().draw(screen)
