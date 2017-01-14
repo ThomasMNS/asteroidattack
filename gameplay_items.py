@@ -458,8 +458,6 @@ class Alien(pygame.sprite.Sprite):
 
         self.lasers = pygame.sprite.Group()
 
-        self.laser_sound = pygame.mixer.Sound('music/laser_alien.ogg')
-
         self.score_increase = 40
         self.health_decrease = 30
 
@@ -491,7 +489,6 @@ class Alien(pygame.sprite.Sprite):
 
     def shoot(self):
         self.lasers.add(AlienLaser(self.rect.x + 45, self.rect.y + 45, self.game_scene))
-        self.laser_sound.play()
 
     def gen_min_max(self):
         num_1 = random.randrange(0, 1000)
@@ -539,6 +536,9 @@ class AlienLaser(pygame.sprite.Sprite):
         self.speed = 8
         self.health_decrease = 30
 
+        self.laser_sound = pygame.mixer.Sound('music/laser_alien.ogg')
+        self.laser_sound.play()
+
     def update(self):
         self.rect.y += self.speed
         if self.rect.y > 768:
@@ -547,6 +547,57 @@ class AlienLaser(pygame.sprite.Sprite):
     def collision(self):
         self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
         self.kill()
+
+
+class Boss(pygame.sprite.Sprite):
+    """ A large red flying saucer. """
+    def __init__(self, game_scene):
+        super().__init__()
+        # So we can access other stuff in the level
+        self.game_scene = game_scene
+
+        # Req for all sprites
+        self.image = pygame.image.load("assets/big_red_saucer.png").convert_alpha()
+        self.rect = self.image.get_rect()
+
+        # Set location and speed
+        self.rect.x = 200
+        self.rect.y = 50
+        self.speed = 5
+
+        # This will hold the lasers the boss has fired
+        self.lasers = pygame.sprite.Group()
+
+        # How much to increase player score by if hit by laser
+        self.score_increase = 5
+
+        # Destroy the player if they hit boss
+        self.health_decrease = 1000
+
+    def update(self, timer):
+
+        # Move from side to side within the screen
+        if self.rect.x + self.rect.width >= 1024:
+            self.speed *= -1
+        elif self.rect.x < 0:
+            self.speed *= -1
+
+        # Move
+        self.rect.x += self.speed
+
+        if timer % 180 == 0:
+            self.shoot()
+
+        self.lasers.update()
+
+    def shoot(self):
+        self.lasers.add(AlienLaser(self.rect.x + 45, self.rect.y + 45, self.game_scene))
+
+    def draw_lasers(self, screen):
+        self.lasers.draw(screen)
+
+    def collision(self):
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
 
 
 class Explosion(pygame.sprite.Sprite):
