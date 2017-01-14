@@ -562,8 +562,10 @@ class Boss(pygame.sprite.Sprite):
 
         # Set location and speed
         self.rect.x = 200
-        self.rect.y = 50
+        self.rect.y = 60
         self.speed = 5
+
+        self.health = 100
 
         # This will hold the lasers the boss has fired
         self.lasers = pygame.sprite.Group()
@@ -590,6 +592,8 @@ class Boss(pygame.sprite.Sprite):
 
         self.lasers.update()
 
+        self.game_scene.boss_health_bar.current_health = self.health
+
     def shoot(self):
         self.lasers.add(AlienLaser(self.rect.x + 45, self.rect.y + 45, self.game_scene))
 
@@ -597,7 +601,9 @@ class Boss(pygame.sprite.Sprite):
         self.lasers.draw(screen)
 
     def collision(self):
+        """ Called if there is a collision with a player laser. """
         self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.health -= 10
 
 
 class Explosion(pygame.sprite.Sprite):
