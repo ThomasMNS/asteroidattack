@@ -70,11 +70,13 @@ class TitleScene(generic_scene.GenericScene):
 class HighScoresScene(generic_scene.GenericScene):
     """ Displays the contents of asteroid-attack-program-highscores.p and gives the option
     to replace the contents with a blank list. """
-    def __init__(self, highscore_to_highlight=None):
+    def __init__(self, highscore_to_highlight=None, players="single"):
         super().__init__()
         # An item in high_score list may be passed if the previous scene was a game over.
         # This is highlighted in green in the draw method.
         self.highscore_to_highlight = highscore_to_highlight
+        # Is the score to be highlighted single or multiplayer, so the correct tab is opened
+        self.list_showing = players
         # Open the highscores list and store in highscores_list. If there is no highscores file (ie
         # the game has been started for the first time), make a blank list.
         try:
@@ -103,11 +105,16 @@ class HighScoresScene(generic_scene.GenericScene):
 
         self.single_button = ui_items.RectangleHoverButton("Single-Player", 140, 40, 300, 70, color=constants.DARK_GREY,
                                                            text_size=25)
+        if self.list_showing == "multi":
+            self.single_button.color = constants.LIGHT_GREY
+            self.single_button.hover_color = constants.DARK_GREY
 
         self.multi_button = ui_items.RectangleHoverButton("Multi-Player", 140, 40, 450, 70, color=constants.LIGHT_GREY,
                                                           hover_color=constants.DARK_GREY, text_size=25)
 
-        self.active_scores = "single"
+        if self.list_showing == "multi":
+            self.multi_button.color = constants.DARK_GREY
+            self.multi_button.hover_color = constants.LIGHT_GREY
 
         self.buttons = [self.return_button, self.clear_button, self.single_button, self.multi_button]
 
@@ -120,7 +127,7 @@ class HighScoresScene(generic_scene.GenericScene):
                                                  0, 1024, 768, constants.LIGHT_GREY_2, constants.DARKER_GREY, "OK",
                                                  "Cancel")
         self.show_popup = False
-        self.list_showing = "single"
+
 
     def handle_events(self, events):
         # If there is no popup, handle events as normal
@@ -682,7 +689,7 @@ class GameOverScene(generic_scene.GenericScene):
             if event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over == True:
                 if self.new_high_score is True:
                     self.update_score()
-                    self.next_scene = HighScoresScene(self.score)
+                    self.next_scene = HighScoresScene(self.score, self.players)
                 else:
                     self.next_scene = TitleScene()
                     print("Not a new high score, going to titles")
