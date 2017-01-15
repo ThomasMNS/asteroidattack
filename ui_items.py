@@ -298,10 +298,20 @@ class HealthBar:
         bar_percentage = (self.current_health / self.full_health)
         self.current_health_bar_width = bar_percentage * self.width
 
+        # Text
+        self.text_size = 25
+        self.font = pygame.font.Font(None, self.text_size)
+
     def update(self):
         bar_percentage = (self.current_health / self.full_health)
         self.current_health_bar_width = bar_percentage * self.width
 
     def draw(self, screen):
-        pygame.draw.rect(screen, constants.RED, (self.x, self.y, self.width, self.height))
-        pygame.draw.rect(screen, constants.GREEN, (self.x, self.y, self.current_health_bar_width, self.height))
+        pygame.draw.rect(screen, constants.HEALTH_RED, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(screen, constants.HEALTH_GREEN, (self.x, self.y, self.current_health_bar_width, self.height))
+
+        health_render = self.font.render(str(self.current_health), True, constants.WHITE)
+        health_render_rect = health_render.get_rect()
+        x = self.x + ((self.width / 2) - (health_render_rect.width / 2))
+        y = self.y + ((self.height / 2) - (health_render_rect.height / 2))
+        screen.blit(health_render, (x, y))
