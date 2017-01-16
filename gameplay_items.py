@@ -571,10 +571,15 @@ class Boss(pygame.sprite.Sprite):
         self.lasers = pygame.sprite.Group()
 
         # How much to increase player score by if hit by laser
-        self.score_increase = 5
+        self.score_increase = 7
 
         # Destroy the player if they hit boss
         self.health_decrease = 1000
+
+        self.phase = "laserfire"
+        self.display_phase = "None"
+
+        self.rapid_firing = False
 
     def update(self, timer):
 
@@ -587,11 +592,32 @@ class Boss(pygame.sprite.Sprite):
         # Move
         self.rect.x += self.speed
 
-        if timer % 180 == 0:
-            self.shoot()
+        if 70 < self.health < 100:
+            self.phase = "laserfire"
+        elif 40 < self.health < 69:
+            self.phase = "rapidfire"
+
+        if self.phase == "laserfire":
+            self.display_phase = "Laser Fire"
+            if timer % 120 == 0:
+                self.shoot()
+        elif self.phase == "rapidfire":
+            self.display_phase = "Rapid Fire"
+            # Every 4 seconds, set firing to True
+            if timer % 180 == 0:
+                self.rapid_firing = True
+                self.rapid_count = 0
+
+            if self.rapid_firing == True:
+                if timer % 10 == 0:
+                    if self.rapid_count < 3:
+                        self.shoot()
+                    self.rapid_count += 1
+
 
         self.lasers.update()
 
+        # Update the health bar
         self.game_scene.boss_health_bar.current_health = self.health
 
     def shoot(self):
