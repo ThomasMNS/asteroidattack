@@ -564,6 +564,7 @@ class Boss(pygame.sprite.Sprite):
         self.rect.x = 200
         self.rect.y = 60
         self.speed = 5
+        self.vertical_speed = 4
 
         self.health = 100
 
@@ -592,10 +593,12 @@ class Boss(pygame.sprite.Sprite):
         # Move
         self.rect.x += self.speed
 
-        if 70 < self.health < 100:
+        if 75 < self.health < 100:
             self.phase = "laserfire"
-        elif 40 < self.health < 69:
+        elif 50 < self.health < 74:
             self.phase = "rapidfire"
+        elif 25 < self.health < 49:
+            self.phase = "divebomb"
 
         if self.phase == "laserfire":
             self.display_phase = "Laser Fire"
@@ -613,6 +616,15 @@ class Boss(pygame.sprite.Sprite):
                     if self.rapid_count < 3:
                         self.shoot()
                     self.rapid_count += 1
+        elif self.phase == "divebomb":
+            self.display_phase = "Dive Bomb"
+            self.rect.y += self.vertical_speed
+            if self.rect.y + self.rect.width > 768:
+                self.vertical_speed *= -1
+            elif self.rect.y < 60:
+                self.vertical_speed *= -1
+            if timer % 60 == 0:
+                self.shoot()
 
 
         self.lasers.update()
