@@ -6,6 +6,7 @@ import pygame
 # Standard library
 import random
 import math
+import inspect
 # Game modules
 import scene_tools
 
@@ -573,7 +574,10 @@ class Boss(pygame.sprite.Sprite):
         self.boss_type = boss_type
 
         # Req for all sprites
-        self.image = pygame.image.load("assets/big_red_saucer.png").convert_alpha()
+        if self.boss_type == 1:
+            self.image = pygame.image.load("assets/big_red_saucer.png").convert_alpha()
+        elif self.boss_type == 2:
+            self.image = pygame.image.load("assets/big_green_saucer.png").convert_alpha()
         self.rect = self.image.get_rect()
 
         # Set location and speed
@@ -593,17 +597,25 @@ class Boss(pygame.sprite.Sprite):
         # Destroy the player if they hit boss
         self.health_decrease = 1000
 
-        self.phase = "laserfire"
-        self.display_phase = "None"
-
+        # Phase specific variables
+        # Rapid Fire
         self.rapid_firing = False
+        # Wall fire
+        # Should the saucer be firing constantly
+        self.wall_firing = False
+        # Has it gone from right to left, and is now returning right
+        self.run_finished = False
+        # Has a random gap location been calculated for the run
+        self.gap_needed = True
+        # Has the phase just started (needed to prevent a bit of firing from left to right)
+        self.just_started = True
 
     def update(self, timer):
 
         # Move from side to side within the screen
-        if self.rect.x + self.rect.width >= 1024:
+        if self.rect.x + self.rect.width >= 1098:
             self.speed *= -1
-        elif self.rect.x < 0:
+        elif self.rect.x < -74:
             self.speed *= -1
 
         # Move
@@ -619,7 +631,8 @@ class Boss(pygame.sprite.Sprite):
             else:
                 self.phase = "firewheel"
         elif self.boss_type == 2:
-            pass
+            if 75 <= self.health <= 100:
+                self.phase = "laserwall"
 
         if self.phase == "laserfire":
             self.display_phase = "Laser Fire"
@@ -655,6 +668,32 @@ class Boss(pygame.sprite.Sprite):
                 while x <= 360:
                     self.shoot(x)
                     x += 20
+        elif self.phase == "laserwall":
+            self.display_phase = "Laser Wall"
+            # Ship has reached top right corner, start firing
+            if self.rect.x + self.rect.width >= 1097:
+                self.wall_firing = True
+                self.run_finished = False
+                self.just_started = False
+            # Fire every 1/6 second
+            if self.wall_firing is True and self.run_finished is not True and self.just_started is False:
+                if timer % 10 == 0:
+                    self.shoot()
+            # Random gap location for the run, if needed
+            if self.gap_needed is True:
+                self.gap_start = random.randrange(200, 800)
+                self.gap_needed = False
+            # If inside the gap, don't fire
+            if self.rect.x <= self.gap_start + 100:
+                self.wall_firing = False
+            if self.rect.x <= self.gap_start:
+                self.wall_firing = True
+            # Ship has reched top left corner, stop firing
+            if self.rect.x <= -73:
+                self.wall_firing = False
+                self.run_finished = True
+                self.gap_needed = True
+
 
 
         self.lasers.update()
