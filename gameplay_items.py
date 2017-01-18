@@ -609,6 +609,11 @@ class Boss(pygame.sprite.Sprite):
         self.gap_needed = True
         # Has the phase just started (needed to prevent a bit of firing from left to right)
         self.just_started = True
+        # Ramming Speed
+        # Is the ship travelling down the screen
+        self.ramming = False
+        # Or up the screen
+        self.returning_from_ram = False
 
     def update(self, timer):
 
@@ -633,6 +638,8 @@ class Boss(pygame.sprite.Sprite):
         elif self.boss_type == 2:
             if 75 <= self.health <= 100:
                 self.phase = "laserwall"
+            elif 50 <= self.health <= 74:
+                self.phase = "rammingspeed"
 
         if self.phase == "laserfire":
             self.display_phase = "Laser Fire"
@@ -693,8 +700,28 @@ class Boss(pygame.sprite.Sprite):
                 self.wall_firing = False
                 self.run_finished = True
                 self.gap_needed = True
-
-
+        elif self.phase == "rammingspeed":
+            self.display_phase = "Ramming Speed"
+            # Every 4 seconds
+            if timer % 240 == 0 and self.returning_from_ram is False:
+                self.ramming = True
+            # If ship reaches bottom of screen, go up and returning_from_ram is True (so can't go down again)
+            if self.rect.y + self.rect.height > 767:
+                self.ramming = False
+                self.returning_from_ram = True
+            # If ramming, go down screen and shoot
+            if self.ramming is True:
+                self.rect.y += self.vertical_speed
+                if timer % 40 == 0:
+                    self.shoot()
+            # Go up screen in straight line
+            if self.ramming is False and self.returning_from_ram is True:
+                self.rect.y -= self.vertical_speed
+                self.speed = 0
+            # Once at top of screen, return to side to side movement
+            if self.returning_from_ram is True and self.rect.y < 60:
+                self.returning_from_ram = False
+                self.speed = 5
 
         self.lasers.update()
 
