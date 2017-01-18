@@ -615,6 +615,16 @@ class Boss(pygame.sprite.Sprite):
         # Or up the screen
         self.returning_from_ram = False
 
+        self.laser_fire_checked = False
+        self.rapid_fire_checked = False
+        self.dive_bomb_checked = False
+        self.fire_wheel_checked = False
+
+        self.laser_wall_checked = False
+        self.ramming_speed_checked = False
+        self.spread_fire_checked = False
+
+
     def update(self, timer):
 
         # Move from side to side within the screen
@@ -640,88 +650,129 @@ class Boss(pygame.sprite.Sprite):
                 self.phase = "laserwall"
             elif 50 <= self.health <= 74:
                 self.phase = "rammingspeed"
+            elif 25 <= self.health <= 49:
+                self.phase = "spreadfire"
 
         if self.phase == "laserfire":
             self.display_phase = "Laser Fire"
-            if timer % 120 == 0:
-                self.shoot()
+            if self.laser_fire_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.laser_fire_checked = True
+            if self.laser_fire_checked is True:
+                if timer % 120 == 0:
+                    self.shoot()
         elif self.phase == "rapidfire":
             self.display_phase = "Rapid Fire"
-            # Every 4 seconds, set firing to True
-            if timer % 180 == 0:
-                self.rapid_firing = True
-                self.rapid_count = 0
+            if self.rapid_fire_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.laser_fire_checked = True
+            if self.laser_fire_checked is True:
+                # Every 4 seconds, set firing to True
+                if timer % 180 == 0:
+                    self.rapid_firing = True
+                    self.rapid_count = 0
 
-            if self.rapid_firing == True:
-                if timer % 10 == 0:
-                    if self.rapid_count < 3:
-                        self.shoot()
-                    self.rapid_count += 1
+                if self.rapid_firing == True:
+                    if timer % 10 == 0:
+                        if self.rapid_count < 3:
+                            self.shoot()
+                        self.rapid_count += 1
         elif self.phase == "divebomb":
             self.display_phase = "Dive Bomb"
-            self.rect.y += self.vertical_speed
-            if self.rect.y + self.rect.width > 768:
-                self.vertical_speed *= -1
-            elif self.rect.y < 60:
-                self.vertical_speed *= -1
-            if timer % 60 == 0:
-                self.shoot()
+            if self.dive_bomb_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.dive_bomb_checked = True
+            if self.dive_bomb_checked is True:
+                self.rect.y += self.vertical_speed
+                if self.rect.y + self.rect.width > 768:
+                    self.vertical_speed *= -1
+                elif self.rect.y < 60:
+                    self.vertical_speed *= -1
+                if timer % 60 == 0:
+                    self.shoot()
         elif self.phase == "firewheel":
             self.display_phase = "Fire Wheel"
-            if self.rect.y != 60:
-                self.rect.y -= 1
-            if timer % 120 == 0:
-                x = 0
-                while x <= 360:
-                    self.shoot(x)
-                    x += 20
+            if self.fire_wheel_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.fire_wheel_checked = True
+            if self.fire_wheel_checked is True:
+                if timer % 120 == 0:
+                    x = 0
+                    while x <= 360:
+                        self.shoot(x)
+                        x += 20
         elif self.phase == "laserwall":
             self.display_phase = "Laser Wall"
-            # Ship has reached top right corner, start firing
-            if self.rect.x + self.rect.width >= 1097:
-                self.wall_firing = True
-                self.run_finished = False
-                self.just_started = False
-            # Fire every 1/6 second
-            if self.wall_firing is True and self.run_finished is not True and self.just_started is False:
-                if timer % 10 == 0:
-                    self.shoot()
-            # Random gap location for the run, if needed
-            if self.gap_needed is True:
-                self.gap_start = random.randrange(200, 800)
-                self.gap_needed = False
-            # If inside the gap, don't fire
-            if self.rect.x <= self.gap_start + 100:
-                self.wall_firing = False
-            if self.rect.x <= self.gap_start:
-                self.wall_firing = True
-            # Ship has reched top left corner, stop firing
-            if self.rect.x <= -73:
-                self.wall_firing = False
-                self.run_finished = True
-                self.gap_needed = True
+            if self.laser_wall_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.laser_fire_checked = True
+            if self.laser_fire_checked is True:
+                # Ship has reached top right corner, start firing
+                if self.rect.x + self.rect.width >= 1097:
+                    self.wall_firing = True
+                    self.run_finished = False
+                    self.just_started = False
+                # Fire every 1/6 second
+                if self.wall_firing is True and self.run_finished is not True and self.just_started is False:
+                    if timer % 10 == 0:
+                        self.shoot()
+                # Random gap location for the run, if needed
+                if self.gap_needed is True:
+                    self.gap_start = random.randrange(200, 800)
+                    self.gap_needed = False
+                # If inside the gap, don't fire
+                if self.rect.x <= self.gap_start + 100:
+                    self.wall_firing = False
+                if self.rect.x <= self.gap_start:
+                    self.wall_firing = True
+                # Ship has reched top left corner, stop firing
+                if self.rect.x <= -73:
+                    self.wall_firing = False
+                    self.run_finished = True
+                    self.gap_needed = True
         elif self.phase == "rammingspeed":
             self.display_phase = "Ramming Speed"
-            # Every 4 seconds
-            if timer % 240 == 0 and self.returning_from_ram is False:
-                self.ramming = True
-            # If ship reaches bottom of screen, go up and returning_from_ram is True (so can't go down again)
-            if self.rect.y + self.rect.height > 767:
-                self.ramming = False
-                self.returning_from_ram = True
-            # If ramming, go down screen and shoot
-            if self.ramming is True:
-                self.rect.y += self.vertical_speed
-                if timer % 40 == 0:
-                    self.shoot()
-            # Go up screen in straight line
-            if self.ramming is False and self.returning_from_ram is True:
-                self.rect.y -= self.vertical_speed
-                self.speed = 0
-            # Once at top of screen, return to side to side movement
-            if self.returning_from_ram is True and self.rect.y < 60:
-                self.returning_from_ram = False
-                self.speed = 5
+            if self.ramming_speed_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.ramming_speed_checked = True
+            if self.ramming_speed_checked is True:
+                # Every 4 seconds
+                if timer % 240 == 0 and self.returning_from_ram is False:
+                    self.ramming = True
+                # If ship reaches bottom of screen, go up and returning_from_ram is True (so can't go down again)
+                if self.rect.y + self.rect.height > 767:
+                    self.ramming = False
+                    self.returning_from_ram = True
+                # If ramming, go down screen and shoot
+                if self.ramming is True:
+                    self.rect.y += self.vertical_speed
+                    if timer % 40 == 0:
+                        self.shoot()
+                # Go up screen in straight line
+                if self.ramming is False and self.returning_from_ram is True:
+                    self.rect.y -= self.vertical_speed
+                    self.speed = 0
+                # Once at top of screen, return to side to side movement
+                if self.returning_from_ram is True and self.rect.y < 60:
+                    self.returning_from_ram = False
+                    self.speed = 5
+        elif self.phase == "spreadfire":
+            self.display_phase = "Spread Fire"
+            if self.spread_fire_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.spread_fire_checked = True
+            if self.spread_fire_checked is True:
+                # Every second
+                if timer % 60 == 0:
+                    for number in (0, 45, 315):
+                        self.shoot(number)
 
         self.lasers.update()
 
@@ -744,6 +795,17 @@ class Boss(pygame.sprite.Sprite):
         """ Called if there is a collision with a player laser. """
         self.game_scene.all_sprites.add(Explosion(self.rect.center[0], self.rect.center[1], self.game_scene.images))
         self.health -= 10
+
+    def reset(self):
+        """ Phases assume that the saucer is at the top of the screen moving from side to side.
+        This makes sure that is the case. """
+        if self.rect.y > 60:
+            self.rect.y -= abs(self.vertical_speed)
+        # Return True if ship is at the top of the screen
+        if self.rect.y <= 60:
+            return True
+        else:
+            return False
 
 
 class Explosion(pygame.sprite.Sprite):
