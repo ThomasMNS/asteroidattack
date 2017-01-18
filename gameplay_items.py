@@ -816,11 +816,6 @@ class Boss(pygame.sprite.Sprite):
                         self.speed = self.old_speed
                         self.radial_position_needed = True
 
-
-
-
-
-
         self.lasers.update()
 
         # Update the health bar
