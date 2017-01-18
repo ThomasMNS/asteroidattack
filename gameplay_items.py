@@ -614,6 +614,13 @@ class Boss(pygame.sprite.Sprite):
         self.ramming = False
         # Or up the screen
         self.returning_from_ram = False
+        # Radial Fire
+        self.radial_firing = False
+        self.radial_position_needed = True
+        self.old_speed_needed = True
+        self.radial_position = 0
+        self.radial_angle = 180
+        self.radial_retreating = False
 
         self.laser_fire_checked = False
         self.rapid_fire_checked = False
@@ -623,10 +630,9 @@ class Boss(pygame.sprite.Sprite):
         self.laser_wall_checked = False
         self.ramming_speed_checked = False
         self.spread_fire_checked = False
-
+        self.radial_fire_checked = False
 
     def update(self, timer):
-
         # Move from side to side within the screen
         if self.rect.x + self.rect.width >= 1098:
             self.speed *= -1
@@ -652,6 +658,8 @@ class Boss(pygame.sprite.Sprite):
                 self.phase = "rammingspeed"
             elif 25 <= self.health <= 49:
                 self.phase = "spreadfire"
+            else:
+                self.phase = "radialfire"
 
         if self.phase == "laserfire":
             self.display_phase = "Laser Fire"
@@ -773,6 +781,45 @@ class Boss(pygame.sprite.Sprite):
                 if timer % 60 == 0:
                     for number in (0, 45, 315):
                         self.shoot(number)
+        elif self.phase == "radialfire":
+            self.display_phase = "Radial Fire"
+            if self.radial_fire_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.radial_fire_checked = True
+            if self.radial_fire_checked is True:
+                if self.radial_retreating is False:
+                    if self.radial_position_needed is True:
+                        self.radial_position = random.randrange(200, 800)
+                        self.radial_position_needed = False
+                    if (self.radial_position - 10) < self.rect.x < (self.radial_position + 10):
+                        if self.old_speed_needed is True:
+                            self.old_speed = self.speed
+                            self.old_speed_needed = False
+                        self.speed = 0
+                        if self.rect.y < 350:
+                            self.rect.y += self.vertical_speed
+                        if 345 < self.rect.y < 355:
+                            self.radial_firing = True
+                        if self.radial_firing is True:
+                            if timer % 10 == 0:
+                                self.shoot(self.radial_angle)
+                                self.radial_angle -= 15
+                            if self.radial_angle == -180:
+                                self.radial_angle = 180
+                                self.radial_retreating = True
+                                self.radial_firing = False
+                if self.radial_retreating is True:
+                    self.rect.y -= self.vertical_speed
+                    if self.rect.y <= 60:
+                        self.radial_retreating = False
+                        self.speed = self.old_speed
+                        self.radial_position_needed = True
+
+
+
+
+
 
         self.lasers.update()
 
