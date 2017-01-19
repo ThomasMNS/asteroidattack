@@ -19,7 +19,7 @@ class BossTwo(game_scene.GameScene):
         self.player_2 = None
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
 
-        self.boss = gameplay_items.Boss(self, 1)
+        self.boss = gameplay_items.Boss(self, 2)
         self.aliens.add(self.boss)
 
         # Level unique UI items
