@@ -14,12 +14,11 @@ import level_5
 class BossOne(game_scene.GameScene):
     """ Class for a level with 1 boss. """
     def __init__(self, ship, ship_2, score, lives):
-        self.score = 0
-        self.lives = 3
-        self.health = 100
         self.player = ship
-        self.player_2 = None
+        self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/black_stars.png').convert())
+        self.score = score
+        self.lives = lives
 
         self.boss = gameplay_items.Boss(self, 1)
         self.aliens.add(self.boss)
