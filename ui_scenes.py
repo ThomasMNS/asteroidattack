@@ -13,6 +13,7 @@ import scene_tools
 import level_1
 import training_scene
 import customisation_scene
+import settings_scene
 # Third party Pygame modules
 import eztext
 
@@ -24,15 +25,18 @@ class TitleScene(generic_scene.GenericScene):
         # Creating buttons
         self.button_color = constants.LIGHT_GREY
         self.button_hover_color = constants.DARK_GREY
-        self.start_button = ui_items.RectangleHoverButton("Play", 300, 90, 362, 300, self.button_color,
+        self.start_button = ui_items.RectangleHoverButton("Play", 300, 85, 362, 250, self.button_color,
                                                  self.button_hover_color)
-        self.highscores_button = ui_items.RectangleHoverButton("High-Scores", 300, 90, 362, 400, self.button_color,
+        self.highscores_button = ui_items.RectangleHoverButton("High-Scores", 300, 85, 362, 345, self.button_color,
                                                       self.button_hover_color)
-        self.instruction_button = ui_items.RectangleHoverButton("Help", 300, 90, 362, 500, self.button_color,
+        self.settings_button = ui_items.RectangleHoverButton("Settings", 300, 85, 362, 440, self.button_color,
+                                                      self.button_hover_color)
+        self.instruction_button = ui_items.RectangleHoverButton("Help", 300, 85, 362, 535, self.button_color,
                                                        self.button_hover_color)
-        self.end_button = ui_items.RectangleHoverButton("End", 300, 90, 362, 600, self.button_color,
+        self.end_button = ui_items.RectangleHoverButton("End", 300, 85, 362, 630, self.button_color,
                                                         self.button_hover_color)
-        self.buttons = [self.start_button, self.highscores_button, self.instruction_button, self.end_button]
+        self.buttons = [self.start_button, self.highscores_button, self.settings_button,
+                        self.instruction_button, self.end_button]
         self.background = pygame.image.load('assets/title_bg.png').convert()
         # Creating and centering logo
         self.logo = pygame.image.load('assets/asteroid_attack_logo.png').convert_alpha()
@@ -49,6 +53,8 @@ class TitleScene(generic_scene.GenericScene):
                     self.next_scene = GameModeSelectionScene()
                 elif self.highscores_button.mouse_over is True:
                     self.next_scene = HighScoresScene()
+                elif self.settings_button.mouse_over is True:
+                    self.next_scene = settings_scene.SettingsScene()
                 elif self.instruction_button.mouse_over is True:
                     self.next_scene = InstructionsScene()
                 elif self.end_button.mouse_over is True:
@@ -62,7 +68,7 @@ class TitleScene(generic_scene.GenericScene):
 
     def draw(self, screen):
         screen.blit(self.background, (0, 0))
-        screen.blit(self.logo, (300, 70))
+        screen.blit(self.logo, (300, 50))
         for button in self.buttons:
             button.draw_button(screen)
 

@@ -315,3 +315,9 @@ class HealthBar:
         x = self.x + ((self.width / 2) - (health_render_rect.width / 2))
         y = self.y + ((self.height / 2) - (health_render_rect.height / 2))
         screen.blit(health_render, (x, y))
+
+
+class Slider:
+    """ A UI control that allows users to select a number by dragging the mouse. """
+    def __init__(self, x, y, width, min_value, max_value):
+        pass
