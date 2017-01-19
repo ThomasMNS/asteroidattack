@@ -320,4 +320,58 @@ class HealthBar:
 class Slider:
     """ A UI control that allows users to select a number by dragging the mouse. """
     def __init__(self, x, y, width, min_value, max_value):
-        pass
+        # Arguments to attributes
+        self.x = x
+        self.y = y
+        self.width = width
+        self.min_value = min_value
+        self.max_value = max_value
+
+        self.thickness = 5
+
+        self.grabbable_rect = [self.x, self.y - 6, 5, 17]
+        self.mouse_over_grabbable = False
+        self.grabbable_clicked = False
+        self.grabbable_color = constants.LIGHT_GREY_2
+
+        self.mouse_x_on_click = None
+
+    def handle_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.mouse_over_grabbable is True:
+                self.grabbable_clicked = True
+                self.mouse_x_on_click = pygame.mouse.get_pos()[0]
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.grabbable_clicked = False
+
+    def update(self):
+        # Check if the mouse is over the grabbable
+        if (self.grabbable_rect[0] < pygame.mouse.get_pos()[0] < self.grabbable_rect[0] + self.grabbable_rect[2]) and (self.grabbable_rect[1] < pygame.mouse.get_pos()[1] < self.grabbable_rect[1] + self.grabbable_rect[3]):
+            self.mouse_over_grabbable = True
+        else:
+            self.mouse_over_grabbable = False
+
+        # Change colour of grabbable when it has been clicked
+        if self.grabbable_clicked is True:
+            self.grabbable_color = constants.LIGHTER_GREY
+        else:
+            self.grabbable_color = constants.LIGHT_GREY_2
+
+        # Every tick, find out how far the mouse moves, move the grabbable by the same amount
+        if self.mouse_x_on_click is not None and self.grabbable_clicked is True:
+            grabbable_movement = pygame.mouse.get_pos()[0] - self.mouse_x_on_click
+            new_grabbable_pos = self.grabbable_rect[0] + grabbable_movement
+            if new_grabbable_pos < self.x:
+                new_grabbable_pos = self.x
+            elif new_grabbable_pos + self.grabbable_rect[2] > self.x + self.width:
+                new_grabbable_pos = self.x + self.width - self.grabbable_rect[2]
+            self.grabbable_rect[0] = new_grabbable_pos
+            self.mouse_x_on_click = pygame.mouse.get_pos()[0]
+            grabbable_movement = 0
+
+    def draw(self, screen):
+        # Draw line
+        pygame.draw.rect(screen, constants.LIGHT_GREY, (self.x, self.y, self.width, self.thickness))
+
+        # Draw grabbable rectangle
+        pygame.draw.rect(screen, self.grabbable_color, self.grabbable_rect)
