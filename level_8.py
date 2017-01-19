@@ -74,10 +74,10 @@ class LevelEight(game_scene.GameScene):
             players = "multi"
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", players)
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "win", players)
+            self.next_scene = ui_scenes.GameOverScene(self.score, "win", self.player_2)
 
     def draw(self, screen):
         super().draw(screen)
