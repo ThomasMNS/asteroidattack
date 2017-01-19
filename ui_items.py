@@ -277,3 +277,41 @@ class OptionButton:
         pygame.draw.ellipse(screen, constants.LIGHT_GREY, (self.x, self.y + 40, 30, 30), circle_1_width)
         screen.blit(self.text_1_render, (self.x + 40, self.y + 7))
         screen.blit(self.text_2_render, (self.x + 40, self.y + 47))
+
+
+class HealthBar:
+    """ A bar that increases or decreases depending on it's value. """
+    def __init__(self):
+
+        # Default size
+        self.width = 300
+        self.height = 30
+
+        # Default to center top of screen
+        self.x = (1024 / 2) - (self.width / 2)
+        self.y = 15
+
+        self.full_health = 100
+        self.current_health = 100
+
+        # How much of the bar should be green
+        bar_percentage = (self.current_health / self.full_health)
+        self.current_health_bar_width = bar_percentage * self.width
+
+        # Text
+        self.text_size = 25
+        self.font = pygame.font.Font(None, self.text_size)
+
+    def update(self):
+        bar_percentage = (self.current_health / self.full_health)
+        self.current_health_bar_width = bar_percentage * self.width
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, constants.HEALTH_RED, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(screen, constants.HEALTH_GREEN, (self.x, self.y, self.current_health_bar_width, self.height))
+
+        health_render = self.font.render(str(self.current_health), True, constants.WHITE)
+        health_render_rect = health_render.get_rect()
+        x = self.x + ((self.width / 2) - (health_render_rect.width / 2))
+        y = self.y + ((self.height / 2) - (health_render_rect.height / 2))
+        screen.blit(health_render, (x, y))

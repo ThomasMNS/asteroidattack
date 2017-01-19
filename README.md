@@ -21,6 +21,9 @@ Requires Python 3 and Pygame. Creates and edits a highscores file (asteroid-atta
 
 # Change log
 
+* 19/01/2017
+  * Boss battles have arrived! Test yourself in battle against two bosses with various unique and increasingly difficult mechanics. Boss battles occur mid way through the campaign and in the final level.
+  * Game no longer crashes when adding a new highscore.
 * 14/01/2017
   * Local multiplayer support! Plug in a controller and navigate the asteroid field with a friend. Be wary though, as bullets from a friend can damage your ship, and you have one less life in multiplayer to keep things balanced.
   * Separate high-scores for single and multiplayer. To support this, the high-scores screen now has a tabbed display.

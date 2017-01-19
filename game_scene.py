@@ -199,33 +199,38 @@ class GameScene(generic_scene.GenericScene):
         if self.player_2 is not None:
             self.player_2.lasers_group.draw(screen)
 
-    def draw_text(self, screen):
+    def draw_text(self, screen, display_progress=False):
+        if display_progress is False:
+            progress_shift = 30
+        else:
+            progress_shift = 0
         # Top left
-        progress_text = "Progress through asteroid field: {0!s}%".format(int((self.timer / 100) * 2))
-        progress_render = self.score_font.render(progress_text, True, constants.WHITE)
-        screen.blit(progress_render, (10, 10))
+        if display_progress is False:
+            progress_text = "Progress through asteroid field: {0!s}%".format(int((self.timer / 100) * 2))
+            progress_render = self.score_font.render(progress_text, True, constants.WHITE)
+            screen.blit(progress_render, (10, 10))
         score_text = "Score: {0!s}".format(self.score)
         score_render = self.score_font.render(score_text, True, constants.WHITE)
-        screen.blit(score_render, (10, 40))
+        screen.blit(score_render, (10, 10 + progress_shift))
         if self.player_2 is None:
             health_text = "Health: {0!s}".format(self.player.health)
         else:
             health_text = "Player 1 Health: {0!s}".format(self.player.health)
         health_render = self.score_font.render(health_text, True, constants.WHITE)
-        screen.blit(health_render, (10, 70))
+        screen.blit(health_render, (10, 40 + progress_shift))
         # Lives at bottom if no player 2
         if self.player_2 is None:
             lives_text = "Lives: {0!s}".format(self.lives)
             lives_render = self.score_font.render(lives_text, True, constants.WHITE)
-            screen.blit(lives_render, (10, 100))
+            screen.blit(lives_render, (10, 70 + progress_shift))
         # Display player 2 health if present
         if self.player_2 is not None:
             health_text_2 = "Player 2 Health: {0!s}".format(self.player_2.health)
             health_render_2 = self.score_font.render(health_text_2, True, constants.WHITE)
-            screen.blit(health_render_2, (10, 100))
+            screen.blit(health_render_2, (10, 70 + progress_shift))
             lives_text = "Lives: {0!s}".format(self.lives)
             lives_render = self.score_font.render(lives_text, True, constants.WHITE)
-            screen.blit(lives_render, (10, 130))
+            screen.blit(lives_render, (10, 100 + progress_shift))
         # Bottom left
         if self.player_2 is None:
             if self.player.speed_boosted is True:

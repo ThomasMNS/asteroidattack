@@ -5,6 +5,8 @@ obstacles (E.g. asteroids), powerups (E.g. speed boost) and scenery (E.g. stars)
 import pygame
 # Standard library
 import random
+import math
+import inspect
 # Game modules
 import scene_tools
 
@@ -458,8 +460,6 @@ class Alien(pygame.sprite.Sprite):
 
         self.lasers = pygame.sprite.Group()
 
-        self.laser_sound = pygame.mixer.Sound('music/laser_alien.ogg')
-
         self.score_increase = 40
         self.health_decrease = 30
 
@@ -491,7 +491,6 @@ class Alien(pygame.sprite.Sprite):
 
     def shoot(self):
         self.lasers.add(AlienLaser(self.rect.x + 45, self.rect.y + 45, self.game_scene))
-        self.laser_sound.play()
 
     def gen_min_max(self):
         num_1 = random.randrange(0, 1000)
@@ -526,27 +525,329 @@ class Alien(pygame.sprite.Sprite):
 
 class AlienLaser(pygame.sprite.Sprite):
     """ Sprite that moves down the screen. Used by the Alien class. """
-    def __init__(self, x, y, game_scene):
+    def __init__(self, x, y, game_scene, angle=0):
         super().__init__()
         self.game_scene = game_scene
         self.image = pygame.image.load('assets/laser_green.png').convert_alpha()
-        self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
-
-        self.rect.x = x
-        self.rect.y = y
 
         self.speed = 8
         self.health_decrease = 30
 
+        self.laser_sound = pygame.mixer.Sound('music/laser_alien.ogg')
+        self.laser_sound.play()
+
+        # Angle and rotation
+        self.angle = angle
+        self.image = pygame.transform.rotate(self.image, self.angle)
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x = x
+        self.rect.y = y
+        self.x_speed = self.speed * math.sin(math.radians(self.angle))
+        self.y_speed = self.speed * math.cos(math.radians(self.angle))
+        self.real_x = x
+        self.real_y = y
+
     def update(self):
-        self.rect.y += self.speed
-        if self.rect.y > 768:
+        self.real_x += self.x_speed
+        self.real_y += self.y_speed
+
+        self.rect.x = round(self.real_x)
+        self.rect.y = round(self.real_y)
+
+        if (0 > self.rect.y > 768) or (0 > self.rect.x > 1024):
             self.kill()
 
     def collision(self):
         self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
         self.kill()
+
+
+class Boss(pygame.sprite.Sprite):
+    """ A large red flying saucer. """
+    def __init__(self, game_scene, boss_type=1):
+        super().__init__()
+        # So we can access other stuff in the level
+        self.game_scene = game_scene
+
+        # Different bosses have different phases
+        self.boss_type = boss_type
+
+        # Req for all sprites
+        if self.boss_type == 1:
+            self.image = pygame.image.load("assets/big_red_saucer.png").convert_alpha()
+        elif self.boss_type == 2:
+            self.image = pygame.image.load("assets/big_green_saucer.png").convert_alpha()
+        self.rect = self.image.get_rect()
+
+        # Set location and speed
+        self.rect.x = 200
+        self.rect.y = 60
+        self.speed = 5
+        self.vertical_speed = 4
+
+        self.health = 100
+
+        # This will hold the lasers the boss has fired
+        self.lasers = pygame.sprite.Group()
+
+        # How much to increase player score by if hit by laser
+        self.score_increase = 7
+
+        # Destroy the player if they hit boss
+        self.health_decrease = 1000
+
+        # Phase specific variables
+        # Rapid Fire
+        self.rapid_firing = False
+        # Wall fire
+        # Should the saucer be firing constantly
+        self.wall_firing = False
+        # Has it gone from right to left, and is now returning right
+        self.run_finished = False
+        # Has a random gap location been calculated for the run
+        self.gap_needed = True
+        # Has the phase just started (needed to prevent a bit of firing from left to right)
+        self.just_started = True
+        # Ramming Speed
+        # Is the ship travelling down the screen
+        self.ramming = False
+        # Or up the screen
+        self.returning_from_ram = False
+        # Radial Fire
+        self.radial_firing = False
+        self.radial_position_needed = True
+        self.old_speed_needed = True
+        self.radial_position = 0
+        self.radial_angle = 180
+        self.radial_retreating = False
+
+        self.laser_fire_checked = False
+        self.rapid_fire_checked = False
+        self.dive_bomb_checked = False
+        self.fire_wheel_checked = False
+
+        self.laser_wall_checked = False
+        self.ramming_speed_checked = False
+        self.spread_fire_checked = False
+        self.radial_fire_checked = False
+
+    def update(self, timer):
+        # Move from side to side within the screen
+        if self.rect.x + self.rect.width >= 1098:
+            self.speed *= -1
+        elif self.rect.x < -74:
+            self.speed *= -1
+
+        # Move
+        self.rect.x += self.speed
+
+        if self.boss_type == 1:
+            if 75 <= self.health <= 100:
+                self.phase = "laserfire"
+            elif 50 <= self.health <= 74:
+                self.phase = "rammingspeed"
+            elif 25 <= self.health <= 49:
+                self.phase = "spreadfire"
+            else:
+                self.phase = "radialfire"
+        elif self.boss_type == 2:
+            if 75 <= self.health <= 100:
+                self.phase = "rapidfire"
+            elif 50 <= self.health <= 74:
+                self.phase = "divebomb"
+            elif 25 <= self.health <= 49:
+                self.phase = "firewheel"
+            else:
+                self.phase = "laserwall"
+
+        if self.phase == "laserfire":
+            self.display_phase = "Laser Fire"
+            if self.laser_fire_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.laser_fire_checked = True
+            if self.laser_fire_checked is True:
+                if timer % 120 == 0:
+                    self.shoot()
+        elif self.phase == "rapidfire":
+            self.display_phase = "Rapid Fire"
+            if self.rapid_fire_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.laser_fire_checked = True
+            if self.laser_fire_checked is True:
+                # Every 4 seconds, set firing to True
+                if timer % 180 == 0:
+                    self.rapid_firing = True
+                    self.rapid_count = 0
+
+                if self.rapid_firing == True:
+                    if timer % 10 == 0:
+                        if self.rapid_count < 3:
+                            self.shoot()
+                        self.rapid_count += 1
+        elif self.phase == "divebomb":
+            self.display_phase = "Dive Bomb"
+            if self.dive_bomb_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.dive_bomb_checked = True
+            if self.dive_bomb_checked is True:
+                self.rect.y += self.vertical_speed
+                if self.rect.y + self.rect.width > 768:
+                    self.vertical_speed *= -1
+                elif self.rect.y < 60:
+                    self.vertical_speed *= -1
+                if timer % 60 == 0:
+                    self.shoot()
+        elif self.phase == "firewheel":
+            self.display_phase = "Fire Wheel"
+            if self.fire_wheel_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.fire_wheel_checked = True
+            if self.fire_wheel_checked is True:
+                if timer % 120 == 0:
+                    x = 0
+                    while x <= 360:
+                        self.shoot(x)
+                        x += 20
+        elif self.phase == "laserwall":
+            self.display_phase = "Laser Wall"
+            if self.laser_wall_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.laser_fire_checked = True
+            if self.laser_fire_checked is True:
+                # Ship has reached top right corner, start firing
+                if self.rect.x + self.rect.width >= 1097:
+                    self.wall_firing = True
+                    self.run_finished = False
+                    self.just_started = False
+                # Fire every 1/6 second
+                if self.wall_firing is True and self.run_finished is not True and self.just_started is False:
+                    if timer % 10 == 0:
+                        self.shoot()
+                # Random gap location for the run, if needed
+                if self.gap_needed is True:
+                    self.gap_start = random.randrange(200, 800)
+                    self.gap_needed = False
+                # If inside the gap, don't fire
+                if self.rect.x <= self.gap_start + 100:
+                    self.wall_firing = False
+                if self.rect.x <= self.gap_start:
+                    self.wall_firing = True
+                # Ship has reched top left corner, stop firing
+                if self.rect.x <= -73:
+                    self.wall_firing = False
+                    self.run_finished = True
+                    self.gap_needed = True
+        elif self.phase == "rammingspeed":
+            self.display_phase = "Ramming Speed"
+            if self.ramming_speed_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.ramming_speed_checked = True
+            if self.ramming_speed_checked is True:
+                # Every 4 seconds
+                if timer % 240 == 0 and self.returning_from_ram is False:
+                    self.ramming = True
+                # If ship reaches bottom of screen, go up and returning_from_ram is True (so can't go down again)
+                if self.rect.y + self.rect.height > 767:
+                    self.ramming = False
+                    self.returning_from_ram = True
+                # If ramming, go down screen and shoot
+                if self.ramming is True:
+                    self.rect.y += self.vertical_speed
+                    if timer % 40 == 0:
+                        self.shoot()
+                # Go up screen in straight line
+                if self.ramming is False and self.returning_from_ram is True:
+                    self.rect.y -= self.vertical_speed
+                    self.speed = 0
+                # Once at top of screen, return to side to side movement
+                if self.returning_from_ram is True and self.rect.y < 60:
+                    self.returning_from_ram = False
+                    self.speed = 5
+        elif self.phase == "spreadfire":
+            self.display_phase = "Spread Fire"
+            if self.spread_fire_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.spread_fire_checked = True
+            if self.spread_fire_checked is True:
+                # Every second
+                if timer % 60 == 0:
+                    for number in (0, 45, 315):
+                        self.shoot(number)
+        elif self.phase == "radialfire":
+            self.display_phase = "Radial Fire"
+            if self.radial_fire_checked is False:
+                self.reset()
+                if self.reset() is True:
+                    self.radial_fire_checked = True
+            if self.radial_fire_checked is True:
+                if self.radial_retreating is False:
+                    if self.radial_position_needed is True:
+                        self.radial_position = random.randrange(200, 800)
+                        self.radial_position_needed = False
+                    if (self.radial_position - 10) < self.rect.x < (self.radial_position + 10):
+                        if self.old_speed_needed is True:
+                            self.old_speed = self.speed
+                            self.old_speed_needed = False
+                        self.speed = 0
+                        if self.rect.y < 350:
+                            self.rect.y += self.vertical_speed
+                        if 345 < self.rect.y < 355:
+                            self.radial_firing = True
+                        if self.radial_firing is True:
+                            if timer % 10 == 0:
+                                self.shoot(self.radial_angle)
+                                self.radial_angle -= 15
+                            if self.radial_angle == -180:
+                                self.radial_angle = 180
+                                self.radial_retreating = True
+                                self.radial_firing = False
+                if self.radial_retreating is True:
+                    self.rect.y -= self.vertical_speed
+                    if self.rect.y <= 60:
+                        self.radial_retreating = False
+                        self.speed = self.old_speed
+                        self.radial_position_needed = True
+
+        self.lasers.update()
+
+        # Update the health bar
+        self.game_scene.boss_health_bar.current_health = self.health
+
+        if self.health <= 0:
+            self.kill()
+            self.game_scene.all_sprites.add(Explosion(self.rect.center[0], self.rect.center[1], self.game_scene.images))
+            for laser in self.lasers:
+                laser.kill()
+
+    def shoot(self, angle=0):
+        self.lasers.add(AlienLaser(self.rect.center[0], self.rect.center[1], self.game_scene, angle))
+
+    def draw_lasers(self, screen):
+        self.lasers.draw(screen)
+
+    def collision(self):
+        """ Called if there is a collision with a player laser. """
+        self.game_scene.all_sprites.add(Explosion(self.rect.center[0], self.rect.center[1], self.game_scene.images))
+        self.health -= 10
+
+    def reset(self):
+        """ Phases assume that the saucer is at the top of the screen moving from side to side.
+        This makes sure that is the case. """
+        if self.rect.y > 60:
+            self.rect.y -= abs(self.vertical_speed)
+        # Return True if ship is at the top of the screen
+        if self.rect.y <= 60:
+            return True
+        else:
+            return False
 
 
 class Explosion(pygame.sprite.Sprite):
