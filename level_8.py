@@ -7,7 +7,7 @@ import game_scene
 import ui_scenes
 import gameplay_items
 import scene_tools
-import boss_2.py
+import boss_2
 
 
 class LevelEight(game_scene.GameScene):
