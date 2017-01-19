@@ -7,8 +7,7 @@ import game_scene
 import ui_scenes
 import gameplay_items
 import scene_tools
-import level_5
-
+import boss_1
 
 class LevelFour(game_scene.GameScene):
     """ Class for level 4. """
@@ -55,7 +54,7 @@ class LevelFour(game_scene.GameScene):
 
         if self.timer == 5000:
             self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
-                                                           level_5.LevelFive)
+                                                           boss_1.BossOne)
 
         if self.lives == 0:
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
