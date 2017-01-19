@@ -181,7 +181,7 @@ class HighScoresScene(generic_scene.GenericScene):
                 rank = 1
                 for score in self.single_highscores:
                     if score == self.highscore_to_highlight:
-                        color = constants.GREEN
+                        color = constants.BRIGHT_GREEN
                     else:
                         color = constants.WHITE
                     rank_text = "{0!s}.".format(rank)
