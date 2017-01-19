@@ -646,20 +646,20 @@ class Boss(pygame.sprite.Sprite):
             if 75 <= self.health <= 100:
                 self.phase = "laserfire"
             elif 50 <= self.health <= 74:
-                self.phase = "rapidfire"
-            elif 25 <= self.health <= 49:
-                self.phase = "divebomb"
-            else:
-                self.phase = "firewheel"
-        elif self.boss_type == 2:
-            if 75 <= self.health <= 100:
-                self.phase = "laserwall"
-            elif 50 <= self.health <= 74:
                 self.phase = "rammingspeed"
             elif 25 <= self.health <= 49:
                 self.phase = "spreadfire"
             else:
                 self.phase = "radialfire"
+        elif self.boss_type == 2:
+            if 75 <= self.health <= 100:
+                self.phase = "rapidfire"
+            elif 50 <= self.health <= 74:
+                self.phase = "divebomb"
+            elif 25 <= self.health <= 49:
+                self.phase = "firewheel"
+            else:
+                self.phase = "laserwall"
 
         if self.phase == "laserfire":
             self.display_phase = "Laser Fire"
