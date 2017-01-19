@@ -7,6 +7,7 @@ import game_scene
 import ui_scenes
 import gameplay_items
 import scene_tools
+import boss_2.py
 
 
 class LevelEight(game_scene.GameScene):
@@ -77,7 +78,7 @@ class LevelEight(game_scene.GameScene):
             self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "win", self.player_2)
+            self.next_scene = boss_2.BossTwo(self.player, self.player_2, self.score, self.lives)
 
     def draw(self, screen):
         super().draw(screen)
