@@ -319,17 +319,28 @@ class HealthBar:
 
 class Slider:
     """ A UI control that allows users to select a number by dragging the mouse. """
-    def __init__(self, x, y, width, min_value, max_value):
+    def __init__(self, x, y, width, min_value, max_value, starting_value):
         # Arguments to attributes
         self.x = x
         self.y = y
         self.width = width
         self.min_value = min_value
         self.max_value = max_value
+        self.starting_value = starting_value
 
         self.thickness = 5
 
-        self.grabbable_rect = [self.x, self.y - 6, 5, 17]
+        # Font
+        self.font = pygame.font.Font(None, 25)
+
+        # What percentage of the bar is the starting value
+        self.value_percentage = (self.starting_value - self.min_value) / (self.max_value - self.min_value)
+        # What does this equate to in pixels
+        self.value_to_draw = self.value_percentage * self.width
+
+        # Location of the grabbable. Take 2 pixels off so that it is drawn slightly left, and the value selected
+        # is in the middle of the grabbable
+        self.grabbable_rect = [self.x + self.value_to_draw - 2, self.y - 6, 5, 17]
         self.mouse_over_grabbable = False
         self.grabbable_clicked = False
         self.grabbable_color = constants.LIGHT_GREY_2
@@ -361,13 +372,21 @@ class Slider:
         if self.mouse_x_on_click is not None and self.grabbable_clicked is True:
             grabbable_movement = pygame.mouse.get_pos()[0] - self.mouse_x_on_click
             new_grabbable_pos = self.grabbable_rect[0] + grabbable_movement
-            if new_grabbable_pos < self.x:
-                new_grabbable_pos = self.x
-            elif new_grabbable_pos + self.grabbable_rect[2] > self.x + self.width:
-                new_grabbable_pos = self.x + self.width - self.grabbable_rect[2]
+            # Keep grabbale within the line
+            if new_grabbable_pos < self.x - 2:
+                new_grabbable_pos = self.x - 2
+            elif new_grabbable_pos + self.grabbable_rect[2] > self.x + self.width + 3:
+                new_grabbable_pos = self.x + self.width - self.grabbable_rect[2] + 3
             self.grabbable_rect[0] = new_grabbable_pos
             self.mouse_x_on_click = pygame.mouse.get_pos()[0]
             grabbable_movement = 0
+
+        # How many pixels along the bar is the centre of the grabbable
+        self.bar_value = self.grabbable_rect[0] + 2
+        # What does this equate to in percent
+        self.bar_percentage = (self.bar_value - self.x) / self.width
+        # What value is selected
+        self.value = ((self.max_value - self.min_value) / 100) * (self.bar_percentage * 100) + self.min_value
 
     def draw(self, screen):
         # Draw line
@@ -375,3 +394,7 @@ class Slider:
 
         # Draw grabbable rectangle
         pygame.draw.rect(screen, self.grabbable_color, self.grabbable_rect)
+
+        # Draw text
+        value_render = self.font.render(str(round(self.value)), True, constants.WHITE)
+        screen.blit(value_render, (self.x + self.width + 10, self.y - 5))
