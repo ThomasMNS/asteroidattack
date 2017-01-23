@@ -326,7 +326,7 @@ class Slider:
         self.width = width
         self.min_value = min_value
         self.max_value = max_value
-        self.starting_value = starting_value
+        self.value = starting_value
 
         self.thickness = 5
 
@@ -334,7 +334,7 @@ class Slider:
         self.font = pygame.font.Font(None, 25)
 
         # What percentage of the bar is the starting value
-        self.value_percentage = (self.starting_value - self.min_value) / (self.max_value - self.min_value)
+        self.value_percentage = (self.value - self.min_value) / (self.max_value - self.min_value)
         # What does this equate to in pixels
         self.value_to_draw = self.value_percentage * self.width
 
