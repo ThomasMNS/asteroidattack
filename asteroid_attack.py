@@ -29,7 +29,7 @@ def main():
 
     # Set up the main game loop
     clock = pygame.time.Clock()
-    active_scene = ui_scenes.TitleScene()
+    active_scene = ui_scenes.OpeningScene()
 
     # Main game loop
     while active_scene is not None:
