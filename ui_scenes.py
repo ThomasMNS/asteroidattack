@@ -82,7 +82,7 @@ class OpeningScene(generic_scene.GenericScene):
 
 
 class TitleScene(generic_scene.GenericScene):
-    """ The initial screen. Contains buttons to navigate to other UI scenes. """
+    """ Contains buttons to navigate to other UI scenes. Shown after the dev logo. """
     def __init__(self, settings):
         super().__init__()
 
