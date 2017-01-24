@@ -13,8 +13,10 @@ import pickle
 
 class SettingsScene(generic_scene.GenericScene):
     """ Class for a scene allowing players to change game settings. """
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
+
+        self.settings = settings
 
         # Buttons
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 640, constants.LIGHT_GREY,
@@ -29,18 +31,6 @@ class SettingsScene(generic_scene.GenericScene):
         self.font = pygame.font.Font(None, 25)
         self.volume_render = self.font.render("Sound volume", True, constants.WHITE)
 
-        # Load the existing settings file, if possible
-        try:
-            f = open('asteroid-attack-program-settings.p', 'rb')
-            self.settings = pickle.load(f)
-            f.close()
-        except FileNotFoundError:
-            f = open('asteroid-attack-program-settings.p', 'wb')
-            f.close()
-            self.settings = {"sound_volume": 50}
-        except EOFError:
-            self.settings = {"sound_volume": 50}
-
         # Create a slider, showing the value loaded from the file
         self.slider = ui_items.Slider(100, 250, 200, 0, 100, self.settings["sound_volume"])
 
@@ -50,7 +40,7 @@ class SettingsScene(generic_scene.GenericScene):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.return_button.mouse_over is True:
                     self.save_settings()
-                    self.next_scene = ui_scenes.TitleScene()
+                    self.next_scene = ui_scenes.TitleScene(self.settings)
 
     def update(self):
         for button in self.buttons:
