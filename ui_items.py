@@ -51,9 +51,6 @@ class RectangleHoverButton(Button):
         super().__init__(text, width, height, x, y, text_size)
         self.color = color
         self.hover_color = hover_color
-        self.sound = pygame.mixer.Sound('music/button.ogg')
-        self.sound.set_volume(0.1)
-        self.sound_played = False
 
     def draw_button(self, screen):
         if self.mouse_over is True:
@@ -65,12 +62,6 @@ class RectangleHoverButton(Button):
 
     def mouse_on_button(self, mouse_pos):
         super().mouse_on_button(mouse_pos)
-        if self.mouse_over is True and self.sound_played is False:
-            self.sound.play()
-            self.sound_played = True
-        if self.mouse_over is False:
-            self.sound_played = False
-
 
 class Popup:
     """ A coloured box that displays some text. Positioned at a given XY location, unless
