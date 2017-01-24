@@ -17,11 +17,77 @@ import settings_scene
 # Third party Pygame modules
 import eztext
 
+class OpeningScene(generic_scene.GenericScene):
+    """ The initial screen. Displays the UnderSand logo and loads the settings file. """
+    def __init__(self):
+        super().__init__()
+        # Load the existing settings file
+        try:
+            # File loaded fine, unpickle settings dict into self.settings
+            f = open('asteroid-attack-program-settings.p', 'rb')
+            self.settings = pickle.load(f)
+            f.close()
+        except FileNotFoundError:
+            # File does not exist (probably first load). Create the file, create a self.settings dict
+            # and populate it with the default settings, then save the file
+            f = open('asteroid-attack-program-settings.p', 'wb')
+            self.settings = {"sound_volume": 50}
+            pickle.dump(self.settings, f)
+            f.close()
+
+        # Load and play the waves sound
+        self.waves = pygame.mixer.Sound('music/waves.ogg')
+        self.waves.play()
+
+        # Load the logo image
+        self.logo = pygame.image.load('assets/undersand_logo.png').convert()
+        self.alpha = 0
+        self.logo.set_alpha(self.alpha)
+
+        # Create a timer, starting at 0
+        self.timer = 0
+
+    def handle_events(self, events):
+        for event in events:
+            # Skip intro if user presses a button or clicks mouse
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                # Stop the waves sound so it doesn't continue playing in the title scene
+                self.waves.stop()
+                self.next_scene = TitleScene(self.settings)
+
+    def update(self):
+        self.timer += 1
+
+        # Black until 1 second
+
+        # Fade in logo between 1 and 4 seconds
+        if 60 < self.timer < 240:
+            if self.alpha < 255:
+                self.alpha += 2
+                self.logo.set_alpha(self.alpha)
+
+        # Fade out logo between 5.5 and 8.5 seconds
+        elif 331 < self.timer < 510:
+            if self.alpha > 0:
+                self.alpha -= 2
+                self.logo.set_alpha(self.alpha)
+
+        # Next scene after 9 seoonds
+        if self.timer >= 540:
+            self.next_scene = TitleScene(self.settings)
+
+    def draw(self, screen):
+        screen.fill(constants.BLACK)
+        screen.blit(self.logo, (237, 171))
+
 
 class TitleScene(generic_scene.GenericScene):
     """ The initial screen. Contains buttons to navigate to other UI scenes. """
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
+
+        self.settings = settings
+
         # Creating buttons
         self.button_color = constants.LIGHT_GREY
         self.button_hover_color = constants.DARK_GREY
@@ -54,7 +120,7 @@ class TitleScene(generic_scene.GenericScene):
                 elif self.highscores_button.mouse_over is True:
                     self.next_scene = HighScoresScene()
                 elif self.settings_button.mouse_over is True:
-                    self.next_scene = settings_scene.SettingsScene()
+                    self.next_scene = settings_scene.SettingsScene(self.settings)
                 elif self.instruction_button.mouse_over is True:
                     self.next_scene = InstructionsScene()
                 elif self.end_button.mouse_over is True:
