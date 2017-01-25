@@ -16,8 +16,10 @@ import ui_scenes
 class TrainingScene(game_scene.GameScene):
     """ A scene for the 'training' game mode. Inherits from the game_scene but with some attributs overriden
     to allow for player chosen numbers of enemies, powerups etc. """
-    def __init__(self, ship, training_choices):
+    def __init__(self, ship, ship_2, training_choices):
         self.player = ship
+        self.player_2 = ship_2
+        self.score = 0
         super().__init__(pygame.image.load('assets/training_background.png').convert())
         self.next_scene = self
         # Getting the user choices

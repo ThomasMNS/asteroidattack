@@ -17,6 +17,7 @@ import settings_scene
 # Third party Pygame modules
 import eztext
 
+
 class OpeningScene(generic_scene.GenericScene):
     """ The initial screen. Displays the UnderSand logo and loads the settings file. """
     def __init__(self):
@@ -37,6 +38,7 @@ class OpeningScene(generic_scene.GenericScene):
 
         # Load and play the waves sound
         self.waves = pygame.mixer.Sound('music/waves.ogg')
+        self.waves.set_volume(self.settings['sound_volume'] / 100)
         self.waves.play()
 
         # Load the logo image
@@ -104,6 +106,11 @@ class TitleScene(generic_scene.GenericScene):
         self.buttons = [self.start_button, self.highscores_button, self.settings_button,
                         self.instruction_button, self.end_button]
         self.background = pygame.image.load('assets/title_bg.png').convert()
+
+        # Buttons sound
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
+
         # Creating and centering logo
         self.logo = pygame.image.load('assets/asteroid_attack_logo.png').convert_alpha()
         logo_size = self.logo.get_rect()
@@ -116,13 +123,17 @@ class TitleScene(generic_scene.GenericScene):
             # If it has, update the next scene
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.start_button.mouse_over is True:
-                    self.next_scene = GameModeSelectionScene()
+                    self.button_sound.play()
+                    self.next_scene = GameModeSelectionScene(self.settings)
                 elif self.highscores_button.mouse_over is True:
-                    self.next_scene = HighScoresScene()
+                    self.button_sound.play()
+                    self.next_scene = HighScoresScene(self.settings)
                 elif self.settings_button.mouse_over is True:
+                    self.button_sound.play()
                     self.next_scene = settings_scene.SettingsScene(self.settings)
                 elif self.instruction_button.mouse_over is True:
-                    self.next_scene = InstructionsScene()
+                    self.button_sound.play()
+                    self.next_scene = InstructionsScene(self.settings)
                 elif self.end_button.mouse_over is True:
                     self.next_scene = None
 
@@ -142,8 +153,11 @@ class TitleScene(generic_scene.GenericScene):
 class HighScoresScene(generic_scene.GenericScene):
     """ Displays the contents of asteroid-attack-program-highscores.p and gives the option
     to replace the contents with a blank list. """
-    def __init__(self, highscore_to_highlight=None, players="single"):
+    def __init__(self, settings, highscore_to_highlight=None, players="single"):
         super().__init__()
+
+        self.settings = settings
+
         # An item in high_score list may be passed if the previous scene was a game over.
         # This is highlighted in green in the draw method.
         self.highscore_to_highlight = highscore_to_highlight
@@ -189,6 +203,8 @@ class HighScoresScene(generic_scene.GenericScene):
             self.multi_button.hover_color = constants.LIGHT_GREY
 
         self.buttons = [self.return_button, self.clear_button, self.single_button, self.multi_button]
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
         self.font = pygame.font.Font(None, 25)
 
@@ -200,16 +216,17 @@ class HighScoresScene(generic_scene.GenericScene):
                                                  "Cancel")
         self.show_popup = False
 
-
     def handle_events(self, events):
         # If there is no popup, handle events as normal
         if self.show_popup is False:
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.clear_button.mouse_over is True:
+                        self.button_sound.play()
                         self.show_popup = True
                     elif self.return_button.mouse_over is True:
-                        self.next_scene = TitleScene()
+                        self.button_sound.play()
+                        self.next_scene = TitleScene(self.settings)
                     elif self.single_button.mouse_over is True:
                         self.list_showing = "single"
                         self.single_button.color = constants.DARK_GREY
@@ -223,6 +240,7 @@ class HighScoresScene(generic_scene.GenericScene):
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.confirmation_popup.button_1.mouse_over is True:
+                        self.button_sound.play()
                         self.highscore_list = [[], []]
                         try:
                             f = open('asteroid-attack-program-highscores.p', 'wb')
@@ -306,8 +324,11 @@ class HighScoresScene(generic_scene.GenericScene):
 class GameModeSelectionScene(generic_scene.GenericScene):
     """ A class for a screen with different buttons that can be clicked to take the user to
     different game mode scenes. """
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
+
+        self.settings = settings
+
         # Images
         self.campaign_banner = pygame.image.load('assets/campaign_banner.png').convert_alpha()
         self.training_banner = pygame.image.load('assets/training_banner.png').convert_alpha()
@@ -319,18 +340,20 @@ class GameModeSelectionScene(generic_scene.GenericScene):
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 640, constants.LIGHT_GREY,
                                                            constants.DARK_GREY)
         self.buttons = [self.campaign_button, self.training_button, self.return_button]
-        # Text
+
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
     def handle_events(self, events):
         for event in events:
             # Checking for clicks on buttons
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.campaign_button.mouse_over is True:
-                    self.next_scene = PlayerNumberScene()
+                    self.next_scene = PlayerNumberScene("campaign")
                 elif self.training_button.mouse_over is True:
-                    self.next_scene = customisation_scene.CustomisationScene("training")
+                    self.next_scene = PlayerNumberScene("training")
                 elif self.return_button.mouse_over is True:
-                    self.next_scene = TitleScene()
+                    self.next_scene = TitleScene(self.settings)
 
     def update(self):
         for button in self.buttons:
@@ -352,8 +375,10 @@ class GameModeSelectionScene(generic_scene.GenericScene):
 
 class PlayerNumberScene(generic_scene.GenericScene):
     """ A class for a screen with buttons allowing the player to select single or multi-player mode. """
-    def __init__(self):
+    def __init__(self, game_mode):
         super().__init__()
+
+        self.game_mode = game_mode
 
         # Check if there is a joystick connected. To be used to check whether multiplaer can be selected.
         self.joystick_count = pygame.joystick.get_count()
@@ -377,12 +402,10 @@ class PlayerNumberScene(generic_scene.GenericScene):
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.single_button.mouse_over is True:
-                self.next_scene = customisation_scene.CustomisationScene("campaign", 1)
+                self.next_scene = customisation_scene.CustomisationScene(self.game_mode, 1)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.multi_button.mouse_over is True:
                 if self.joystick_connected is True:
-                    self.next_scene = customisation_scene.CustomisationScene("campaign", 2, 1)
-                else:
-                    pass
+                    self.next_scene = customisation_scene.CustomisationScene(self.game_mode, 2, 1)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
                 self.next_scene = GameModeSelectionScene()
 
@@ -407,9 +430,10 @@ class PlayerNumberScene(generic_scene.GenericScene):
 class TrainingSetupScene(generic_scene.GenericScene):
     """ A class for a screen that contains various UI components to change variables such as the number of
     asteroids, powerups etc. These are then passed to a training scene. """
-    def __init__(self, ship):
+    def __init__(self, ship, ship_2=None):
         super().__init__()
         self.ship = ship
+        self.ship_2 = ship_2
         self.start_button = ui_items.RectangleHoverButton("Start", 300, 90, 202, 640, constants.LIGHT_GREY,
                                                            constants.DARK_GREY)
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 202 + 20 + 300, 640, constants.DARKER_RED,
@@ -490,7 +514,7 @@ class TrainingSetupScene(generic_scene.GenericScene):
                                         self.alien_time_selector.value,
                                         self.powerups_toggle.value, self.lives_selector.value,
                                         self.health_selector.value]
-                    self.next_scene = GetReadyScene("training", self.ship, training_choices)
+                    self.next_scene = GetReadyScene("training", self.ship, self.ship_2, training_choices)
 
     def update(self):
         for button in self.buttons:
@@ -628,7 +652,7 @@ class GetReadyScene(generic_scene.GenericScene):
             if self.mode == "campaign":
                 self.next_scene = level_1.LevelOne(self.ship, self.ship_2)
             elif self.mode == "training":
-                self.next_scene = training_scene.TrainingScene(self.ship, self.choices)
+                self.next_scene = training_scene.TrainingScene(self.ship, self.ship_2, self.choices)
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)

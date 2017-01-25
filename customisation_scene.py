@@ -128,9 +128,13 @@ class CustomisationScene(generic_scene.GenericScene):
                     if self.player_choosing == 1:
                         if self.next_level == "campaign":
                             self.next_scene = CustomisationScene("campaign", 2, 2, self.ship, self.appearance)
+                        elif self.next_level == "training":
+                            self.next_scene = CustomisationScene("training", 2, 2, self.ship, self.appearance)
                     elif self.player_choosing == 2:
                         if self.next_level == "campaign":
                             self.next_scene = ui_scenes.GetReadyScene("campaign", self.player_one, self.ship)
+                        elif self.next_level == "training":
+                            self.next_scene = ui_scenes.TrainingSetupScene(self.player_one, self.ship)
             # Testing
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
