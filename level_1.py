@@ -12,7 +12,9 @@ import scene_tools
 
 class LevelOne(game_scene.GameScene):
     """ Class for the first game level. """
-    def __init__(self, ship, ship_2=None):
+    def __init__(self, settings, ship, ship_2=None):
+
+        self.settings = settings
 
         self.player = ship
         # If there is only one player, self.player_2 = None
@@ -39,11 +41,11 @@ class LevelOne(game_scene.GameScene):
                                        argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
-                                                           level_2.LevelTwo)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.settings, self.player, self.player_2, self.score,
+                                                           self.lives, level_2.LevelTwo)
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2, self.settings)
 
     def draw(self, screen):
         super().draw(screen)

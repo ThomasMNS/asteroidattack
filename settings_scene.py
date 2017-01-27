@@ -22,6 +22,8 @@ class SettingsScene(generic_scene.GenericScene):
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 640, constants.LIGHT_GREY,
                                                            constants.DARK_GREY)
         self.buttons = [self.return_button]
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
         # Text
         self.header_font = pygame.font.Font(None, 45)
@@ -39,6 +41,7 @@ class SettingsScene(generic_scene.GenericScene):
             self.slider.handle_events(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.return_button.mouse_over is True:
+                    self.button_sound.play()
                     self.save_settings()
                     self.next_scene = ui_scenes.TitleScene(self.settings)
 
@@ -47,6 +50,7 @@ class SettingsScene(generic_scene.GenericScene):
             button.mouse_on_button(pygame.mouse.get_pos())
 
         self.slider.update()
+        pygame.mixer.music.set_volume(self.slider.value / 100)
 
     def draw(self, screen):
         # Background

@@ -32,9 +32,12 @@ class OpeningScene(generic_scene.GenericScene):
             # File does not exist (probably first load). Create the file, create a self.settings dict
             # and populate it with the default settings, then save the file
             f = open('asteroid-attack-program-settings.p', 'wb')
-            self.settings = {"sound_volume": 50}
+            self.settings = {"sound_volume": 50, "menu_music_playing": False, "level_music_playing": False}
             pickle.dump(self.settings, f)
             f.close()
+
+        self.settings['menu_music_playing'] = False
+        self.settings['level_music_playing'] = False
 
         # Load and play the waves sound
         self.waves = pygame.mixer.Sound('music/waves.ogg')
@@ -48,6 +51,7 @@ class OpeningScene(generic_scene.GenericScene):
 
         # Create a timer, starting at 0
         self.timer = 0
+
 
     def handle_events(self, events):
         for event in events:
@@ -117,6 +121,13 @@ class TitleScene(generic_scene.GenericScene):
         self.logo_x = logo_size[2]
         self.logo_x = ((1024 / 2) - (self.logo_x / 2))
 
+        self.timer = 0
+        self.volume = pygame.mixer.music.get_volume()
+        self.volume_reduction_interval = self.volume / 10
+
+        print("Title Music:", self.settings['menu_music_playing'])
+        print("Level Music:", self.settings['level_music_playing'])
+
     def handle_events(self, events):
         for event in events:
             # Checking if a button has been clicked on.
@@ -142,6 +153,21 @@ class TitleScene(generic_scene.GenericScene):
         # They will then update self.mouse_over to be True or False
         for button in self.buttons:
             button.mouse_on_button(pygame.mouse.get_pos())
+
+        if self.settings['level_music_playing'] is True and self.settings['menu_music_playing'] is False:
+            if pygame.mixer.music.get_volume() - self.volume_reduction_interval > 0:
+                if self.timer % 60 == 0:
+                    self.volume -= self.volume_reduction_interval
+                    pygame.mixer.music.set_volume(self.volume)
+            elif pygame.mixer.music.get_volume() - self.volume_reduction_interval <= 0:
+                self.settings['level_music_playing'] = False
+        elif self.settings['level_music_playing'] is False and self.settings['menu_music_playing'] is False:
+            print("And start playing!")
+            pygame.mixer.music.load('music/title_music.ogg')
+            pygame.mixer.music.set_volume(self.settings['sound_volume'] / 100)
+            pygame.mixer.music.play(-1)
+            self.settings['menu_music_playing'] = True
+        self.timer += 1
 
     def draw(self, screen):
         screen.blit(self.background, (0, 0))
@@ -349,10 +375,13 @@ class GameModeSelectionScene(generic_scene.GenericScene):
             # Checking for clicks on buttons
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.campaign_button.mouse_over is True:
-                    self.next_scene = PlayerNumberScene("campaign")
+                    self.button_sound.play()
+                    self.next_scene = PlayerNumberScene("campaign", self.settings)
                 elif self.training_button.mouse_over is True:
-                    self.next_scene = PlayerNumberScene("training")
+                    self.button_sound.play()
+                    self.next_scene = PlayerNumberScene("training", self.settings)
                 elif self.return_button.mouse_over is True:
+                    self.button_sound.play()
                     self.next_scene = TitleScene(self.settings)
 
     def update(self):
@@ -375,8 +404,10 @@ class GameModeSelectionScene(generic_scene.GenericScene):
 
 class PlayerNumberScene(generic_scene.GenericScene):
     """ A class for a screen with buttons allowing the player to select single or multi-player mode. """
-    def __init__(self, game_mode):
+    def __init__(self, game_mode, settings):
         super().__init__()
+
+        self.settings = settings
 
         self.game_mode = game_mode
 
@@ -395,6 +426,8 @@ class PlayerNumberScene(generic_scene.GenericScene):
             self.multi_button = ui_items.RectangleHoverButton("Two Players", 300, 90, 362, 500, color=constants.DARK_GREY)
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 600)
         self.buttons = [self.single_button, self.multi_button, self.return_button]
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
         # Tooltip
         self.multi_tip = ui_items.Tooltip(["No joystick", "detected"], 130, 70)
@@ -402,12 +435,17 @@ class PlayerNumberScene(generic_scene.GenericScene):
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.single_button.mouse_over is True:
-                self.next_scene = customisation_scene.CustomisationScene(self.game_mode, 1)
+                self.button_sound.play()
+                self.next_scene = customisation_scene.CustomisationScene(self.settings, self.game_mode, 1,
+                                                                         self.settings)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.multi_button.mouse_over is True:
                 if self.joystick_connected is True:
-                    self.next_scene = customisation_scene.CustomisationScene(self.game_mode, 2, 1)
+                    self.button_sound.play()
+                    self.next_scene = customisation_scene.CustomisationScene(self.settings, self.game_mode, 2, 1,
+                                                                             self.settings)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
-                self.next_scene = GameModeSelectionScene()
+                self.button_sound.play()
+                self.next_scene = GameModeSelectionScene(self.settings)
 
     def update(self):
         for button in self.buttons:
@@ -430,8 +468,11 @@ class PlayerNumberScene(generic_scene.GenericScene):
 class TrainingSetupScene(generic_scene.GenericScene):
     """ A class for a screen that contains various UI components to change variables such as the number of
     asteroids, powerups etc. These are then passed to a training scene. """
-    def __init__(self, ship, ship_2=None):
+    def __init__(self, ship, settings, ship_2=None):
         super().__init__()
+
+        self.settings = settings
+
         self.ship = ship
         self.ship_2 = ship_2
         self.start_button = ui_items.RectangleHoverButton("Start", 300, 90, 202, 640, constants.LIGHT_GREY,
@@ -439,6 +480,8 @@ class TrainingSetupScene(generic_scene.GenericScene):
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 202 + 20 + 300, 640, constants.DARKER_RED,
                                                            constants.DARK_RED)
         self.buttons = [self.start_button, self.return_button]
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
         self.column_1_x = 20
         self.column_spacing = 300
@@ -502,7 +545,8 @@ class TrainingSetupScene(generic_scene.GenericScene):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.return_button.mouse_over is True:
-                    self.next_scene = GameModeSelectionScene()
+                    self.button_sound.play()
+                    self.next_scene = GameModeSelectionScene(self.settings)
                 elif self.start_button.mouse_over is True:
                     training_choices = [self.brown_asteroid_toggle.value, self.brown_asteroid_selector.value,
                                         self.brown_asteroid_time_selector.value,
@@ -514,7 +558,7 @@ class TrainingSetupScene(generic_scene.GenericScene):
                                         self.alien_time_selector.value,
                                         self.powerups_toggle.value, self.lives_selector.value,
                                         self.health_selector.value]
-                    self.next_scene = GetReadyScene("training", self.ship, self.ship_2, training_choices)
+                    self.next_scene = GetReadyScene(self.settings, "training", self.ship, self.ship_2, training_choices)
 
     def update(self):
         for button in self.buttons:
@@ -551,19 +595,26 @@ class TrainingSetupScene(generic_scene.GenericScene):
 
 class InstructionsScene(generic_scene.GenericScene):
     """ A class for a screen outlining how to play the game. """
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
+
+        self.settings = settings
+
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 202, 640, constants.LIGHT_GREY,
                                                            constants.DARK_GREY)
         self.acknowledgements_button = ui_items.RectangleHoverButton("Acknowledgements", 300, 90, 522, 640, constants.LIGHT_GREY,
                                                                      constants.DARK_GREY)
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over == True:
-                self.next_scene = TitleScene()
+                self.button_sound.play()
+                self.next_scene = TitleScene(self.settings)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.acknowledgements_button.mouse_over == True:
-                self.next_scene = AcknowledgementsScene()
+                self.button_sound.play()
+                self.next_scene = AcknowledgementsScene(self.settings)
 
     def update(self):
         self.return_button.mouse_on_button(pygame.mouse.get_pos())
@@ -594,15 +645,21 @@ class InstructionsScene(generic_scene.GenericScene):
 
 class AcknowledgementsScene(generic_scene.GenericScene):
     """ A class for a scene that displays the credits. """
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
+
+        self.settings = settings
+
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 640, constants.LIGHT_GREY,
                                                            constants.DARK_GREY)
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
-                self.next_scene = InstructionsScene()
+                self.button_sound.play()
+                self.next_scene = InstructionsScene(self.settings)
 
     def update(self):
         self.return_button.mouse_on_button(pygame.mouse.get_pos())
@@ -630,8 +687,11 @@ class AcknowledgementsScene(generic_scene.GenericScene):
 
 class GetReadyScene(generic_scene.GenericScene):
     """ Displayed before Level 1 begins to give the player a moment to prepare."""
-    def __init__(self, mode, ship, ship_2=None, choices=None):
+    def __init__(self, settings, mode, ship, ship_2=None, choices=None):
         super().__init__()
+
+        self.settings = settings
+
         self.mode = mode
         self.choices = choices
         self.ship = ship
@@ -642,17 +702,46 @@ class GetReadyScene(generic_scene.GenericScene):
         self.get_ready_render = self.font.render(self.get_ready_text, True, constants.WHITE)
         self.timer = 0
 
+        if self.settings['level_music_playing'] is False and self.settings['menu_music_playing'] is True:
+            # Get the volume of the title music
+            self.volume = pygame.mixer.music.get_volume()
+            self.volume_reduction_increment = self.volume / 10
+
+        self.first_time = False
+
     def handle_events(self, events):
         pass
 
     def update(self):
+        if self.settings['level_music_playing'] is False and self.settings['menu_music_playing'] is True:
+            self.first_time = True
+            # If the title music has not faded out yet
+            if pygame.mixer.music.get_volume() - self.volume_reduction_increment > 0:
+                if self.timer % 30 == 0:
+                    self.volume -= self.volume_reduction_increment
+                    pygame.mixer.music.set_volume(self.volume)
+            # If the title music has faded out
+            elif pygame.mixer.music.get_volume() - self.volume_reduction_increment < 0:
+                self.settings['menu_music_playing'] = False
+        elif self.settings['level_music_playing'] is False and self.settings['menu_music_playing'] is False:
+            pygame.mixer.music.load('music/level_music.ogg')
+            pygame.mixer.music.set_volume(self.settings['sound_volume'] / 100)
+            pygame.mixer.music.play(-1)
+            self.settings['level_music_playing'] = True
+
         # Display the screen for 4 seconds, then move to Level 1
         self.timer += 1
-        if self.timer > 240:
+
+        if self.first_time == True:
+            time = 600
+        elif self.first_time == False:
+            time = 300
+
+        if self.timer > time:
             if self.mode == "campaign":
-                self.next_scene = level_1.LevelOne(self.ship, self.ship_2)
+                self.next_scene = level_1.LevelOne(self.settings, self.ship, self.ship_2)
             elif self.mode == "training":
-                self.next_scene = training_scene.TrainingScene(self.ship, self.ship_2, self.choices)
+                self.next_scene = training_scene.TrainingScene(self.settings, self.ship, self.ship_2, self.choices)
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)
@@ -661,8 +750,9 @@ class GetReadyScene(generic_scene.GenericScene):
 
 class LevelCompleteScene(generic_scene.GenericScene):
     """ Displayed between levels. Shows the player's score and gives them a chance to prepare. """
-    def __init__(self, ship, ship_2, score, lives, level):
+    def __init__(self, settings, ship, ship_2, score, lives, level):
         super().__init__()
+        self.settings = settings
         self.score = score
         self.lives = lives
         self.level = level
@@ -688,7 +778,7 @@ class LevelCompleteScene(generic_scene.GenericScene):
     def update(self):
         self.timer += 1
         if self.timer > 240:
-            self.next_scene = self.level(self.player, self.player_2, self.score, self.lives)
+            self.next_scene = self.level(self.settings, self.player, self.player_2, self.score, self.lives)
 
     def draw(self, screen):
         screen.fill(constants.DARKER_GREY)
@@ -701,8 +791,11 @@ class GameOverScene(generic_scene.GenericScene):
     """ Reads the highscores and allows the user to enter a name for their
     highscore entry if they are in the top 10. Displays game over or congrats depending on what is passed
     to the constructor. """
-    def __init__(self, score, game_over_type, player_2):
+    def __init__(self, score, game_over_type, player_2, settings):
         super().__init__()
+
+        self.settings = settings
+
         self.score = score
         self.type = game_over_type
         if player_2 is None:
@@ -779,16 +872,18 @@ class GameOverScene(generic_scene.GenericScene):
         else:
             self.return_button = ui_items.RectangleHoverButton("Return", 300, 100, 362, 620, constants.LIGHT_GREY,
                                                       constants.DARK_GREY)
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over == True:
+                self.button_sound.play()
                 if self.new_high_score is True:
                     self.update_score()
-                    self.next_scene = HighScoresScene(self.score, self.players)
+                    self.next_scene = HighScoresScene(self.settings, self.score, self.players)
                 else:
-                    self.next_scene = TitleScene()
-                    print("Not a new high score, going to titles")
+                    self.next_scene = TitleScene(self.settings)
         if self.new_high_score is True:
             self.textbox.update(events)
 
@@ -829,8 +924,11 @@ class GameOverScene(generic_scene.GenericScene):
 
 class TrainingGameOverScene(generic_scene.GenericScene):
     """ Displays game over. """
-    def __init__(self, score, game_over_type):
+    def __init__(self, score, game_over_type, settings):
         super().__init__()
+
+        self.settings = settings
+
         self.score = score
         self.type = game_over_type
         self.font = pygame.font.Font(None, 150)
@@ -855,11 +953,14 @@ class TrainingGameOverScene(generic_scene.GenericScene):
 
         self.return_button = ui_items.RectangleHoverButton("Return", 300, 90, 362, 640, constants.LIGHT_GREY,
                                                            constants.DARK_GREY)
+        self.button_sound = pygame.mixer.Sound('music/button.ogg')
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
 
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.return_button.mouse_over is True:
-                self.next_scene = TitleScene()
+                self.button_sound.play()
+                self.next_scene = TitleScene(self.settings)
 
     def update(self):
         self.return_button.mouse_on_button(pygame.mouse.get_pos())

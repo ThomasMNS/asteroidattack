@@ -11,7 +11,8 @@ import boss_1
 
 class LevelFour(game_scene.GameScene):
     """ Class for level 4. """
-    def __init__(self, ship, ship_2, score, lives):
+    def __init__(self, settings, ship, ship_2, score, lives):
+        self.settings = settings
         self.player = ship
         self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/dark_blue_stars.png').convert())
@@ -53,11 +54,11 @@ class LevelFour(game_scene.GameScene):
         scene_tools.add_falling_object(self.timer, 1800, gameplay_items.Alien, self.aliens, argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
-                                                           boss_1.BossOne)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.settings, self.player, self.player_2, self.score,
+                                                           self.lives, boss_1.BossOne)
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2, self.settings)
 
     def draw(self, screen):
         super().draw(screen)

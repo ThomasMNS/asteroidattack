@@ -12,7 +12,8 @@ import level_6
 
 class LevelFive(game_scene.GameScene):
     """ Class for level 5. """
-    def __init__(self, ship, ship_2, score, lives):
+    def __init__(self, settings, ship, ship_2, score, lives):
+        self.settings = settings
         self.player = ship
         self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/dark_purple_stars.png').convert())
@@ -62,11 +63,11 @@ class LevelFive(game_scene.GameScene):
                                        self.asteroids, argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
-                                                           level_6.LevelSix)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.settings, self.player, self.player_2, self.score,
+                                                           self.lives, level_6.LevelSix)
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2, self.settings)
 
     def draw(self, screen):
         super().draw(screen)
