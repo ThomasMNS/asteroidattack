@@ -32,7 +32,8 @@ class OpeningScene(generic_scene.GenericScene):
             # File does not exist (probably first load). Create the file, create a self.settings dict
             # and populate it with the default settings, then save the file
             f = open('asteroid-attack-program-settings.p', 'wb')
-            self.settings = {"sound_volume": 50, "menu_music_playing": False, "level_music_playing": False}
+            self.settings = {"sound_volume": 50, "music_volume": 50, "menu_music_playing": False,
+                             "level_music_playing": False}
             pickle.dump(self.settings, f)
             f.close()
 
@@ -41,7 +42,7 @@ class OpeningScene(generic_scene.GenericScene):
 
         # Load and play the waves sound
         self.waves = pygame.mixer.Sound('music/waves.ogg')
-        self.waves.set_volume(self.settings['sound_volume'] / 100)
+        self.waves.set_volume(self.settings['music_volume'] / 100)
         self.waves.play()
 
         # Load the logo image
@@ -123,11 +124,12 @@ class TitleScene(generic_scene.GenericScene):
 
         self.timer = 0
 
-        pygame.mixer.music.load('music/title_music.ogg')
-        pygame.mixer.music.set_volume(self.settings['sound_volume'] / 100)
-        pygame.mixer.music.play(-1)
-        self.settings['level_music_playing'] = False
-        self.settings['menu_music_playing'] = True
+        if self.settings['menu_music_playing'] is False:
+            pygame.mixer.music.load('music/title_music.ogg')
+            pygame.mixer.music.set_volume(self.settings['music_volume'] / 100)
+            pygame.mixer.music.play(-1)
+            self.settings['level_music_playing'] = False
+            self.settings['menu_music_playing'] = True
 
     def handle_events(self, events):
         for event in events:
@@ -712,7 +714,7 @@ class GetReadyScene(generic_scene.GenericScene):
                 self.settings['menu_music_playing'] = False
         elif self.settings['level_music_playing'] is False and self.settings['menu_music_playing'] is False:
             pygame.mixer.music.load('music/level_music.ogg')
-            pygame.mixer.music.set_volume(self.settings['sound_volume'] / 100)
+            pygame.mixer.music.set_volume(self.settings['music_volume'] / 100)
             pygame.mixer.music.play(-1)
             self.settings['level_music_playing'] = True
 
