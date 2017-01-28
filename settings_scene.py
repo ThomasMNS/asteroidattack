@@ -32,13 +32,17 @@ class SettingsScene(generic_scene.GenericScene):
 
         self.font = pygame.font.Font(None, 25)
         self.volume_render = self.font.render("Sound volume", True, constants.WHITE)
+        self.music_render = self.font.render("Music volume", True, constants.WHITE)
 
         # Create a slider, showing the value loaded from the file
-        self.slider = ui_items.Slider(100, 250, 200, 0, 100, self.settings["sound_volume"])
+        self.sound_slider = ui_items.Slider(100, 250, 200, 0, 100, self.settings["sound_volume"])
+        self.music_slider = ui_items.Slider(100, 350, 200, 0, 100, self.settings["music_volume"])
+        self.sliders = [self.sound_slider, self.music_slider]
 
     def handle_events(self, events):
         for event in events:
-            self.slider.handle_events(event)
+            for slider in self.sliders:
+                slider.handle_events(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.return_button.mouse_over is True:
                     self.button_sound.play()
@@ -46,11 +50,13 @@ class SettingsScene(generic_scene.GenericScene):
                     self.next_scene = ui_scenes.TitleScene(self.settings)
 
     def update(self):
+        self.button_sound.set_volume(self.settings['sound_volume'] / 100)
         for button in self.buttons:
             button.mouse_on_button(pygame.mouse.get_pos())
 
-        self.slider.update()
-        pygame.mixer.music.set_volume(self.slider.value / 100)
+        for slider in self.sliders:
+            slider.update()
+        pygame.mixer.music.set_volume(self.music_slider.value / 100)
 
     def draw(self, screen):
         # Background
@@ -61,10 +67,13 @@ class SettingsScene(generic_scene.GenericScene):
 
         screen.blit(self.header_render, ((1024 / 2) - (self.header_rect.width / 2), 40))
         screen.blit(self.volume_render, (100, 200))
-        self.slider.draw(screen)
+        screen.blit(self.music_render, (100, 300))
+        for slider in self.sliders:
+            slider.draw(screen)
 
     def save_settings(self):
-        self.settings["sound_volume"] = self.slider.value
+        self.settings["sound_volume"] = self.sound_slider.value
+        self.settings["music_volume"] = self.music_slider.value
         f = open('asteroid-attack-program-settings.p', 'wb')
         pickle.dump(self.settings, f)
         f.close()
