@@ -122,11 +122,12 @@ class TitleScene(generic_scene.GenericScene):
         self.logo_x = ((1024 / 2) - (self.logo_x / 2))
 
         self.timer = 0
-        self.volume = pygame.mixer.music.get_volume()
-        self.volume_reduction_interval = self.volume / 10
 
-        print("Title Music:", self.settings['menu_music_playing'])
-        print("Level Music:", self.settings['level_music_playing'])
+        pygame.mixer.music.load('music/title_music.ogg')
+        pygame.mixer.music.set_volume(self.settings['sound_volume'] / 100)
+        pygame.mixer.music.play(-1)
+        self.settings['level_music_playing'] = False
+        self.settings['menu_music_playing'] = True
 
     def handle_events(self, events):
         for event in events:
@@ -153,20 +154,6 @@ class TitleScene(generic_scene.GenericScene):
         # They will then update self.mouse_over to be True or False
         for button in self.buttons:
             button.mouse_on_button(pygame.mouse.get_pos())
-
-        if self.settings['level_music_playing'] is True and self.settings['menu_music_playing'] is False:
-            if pygame.mixer.music.get_volume() - self.volume_reduction_interval > 0:
-                if self.timer % 60 == 0:
-                    self.volume -= self.volume_reduction_interval
-                    pygame.mixer.music.set_volume(self.volume)
-            elif pygame.mixer.music.get_volume() - self.volume_reduction_interval <= 0:
-                self.settings['level_music_playing'] = False
-        elif self.settings['level_music_playing'] is False and self.settings['menu_music_playing'] is False:
-            print("And start playing!")
-            pygame.mixer.music.load('music/title_music.ogg')
-            pygame.mixer.music.set_volume(self.settings['sound_volume'] / 100)
-            pygame.mixer.music.play(-1)
-            self.settings['menu_music_playing'] = True
         self.timer += 1
 
     def draw(self, screen):
@@ -721,7 +708,7 @@ class GetReadyScene(generic_scene.GenericScene):
                     self.volume -= self.volume_reduction_increment
                     pygame.mixer.music.set_volume(self.volume)
             # If the title music has faded out
-            elif pygame.mixer.music.get_volume() - self.volume_reduction_increment < 0:
+            else:
                 self.settings['menu_music_playing'] = False
         elif self.settings['level_music_playing'] is False and self.settings['menu_music_playing'] is False:
             pygame.mixer.music.load('music/level_music.ogg')
