@@ -661,17 +661,21 @@ class AcknowledgementsScene(generic_scene.GenericScene):
                                     "- Explosion animation: WrathGames Studio (wrathgames.com/blog)",
                                     "http://opengameart.org/content/wgstudio-explosion-animation (CC-BY 3.0)",
                                     "- Star collection sound: ProjectsU012",
-                                    "https://www.freesound.org/people/ProjectsU012/sounds/341695/ (CC BY 3.0)",
+                                    "https://www.freesound.org/people/ProjectsU012/sounds/341695/ (CC-BY 3.0)",
                                     "- Powerup sound: wildweasel",
-                                    "https://www.freesound.org/people/wildweasel/sounds/39017/ (CC BY 3.0)",
+                                    "https://www.freesound.org/people/wildweasel/sounds/39017/ (CC-BY 3.0)",
                                     "- Explosion sound: ryansnook",
-                                    "https://www.freesound.org/people/ryansnook/sounds/110113/ (CC BY-NC 1.0)",
+                                    "https://www.freesound.org/people/ryansnook/sounds/110113/ (CC-BY-NC 1.0)",
                                     "- Alarm sound: jbum",
-                                    "https://www.freesound.org/people/jbum/sounds/32089/ (CC BY-NC 1.0)",
+                                    "https://www.freesound.org/people/jbum/sounds/32089/ (CC-BY-NC 1.0)",
+                                    "- Title music: maxstack",
+                                    "http://opengameart.org/content/freelance (CC-BY-SA 3.0)",
+                                    "- Level music: Arthur",
+                                    "http://opengameart.org/content/space-walk (CC-BY-SA 3.0)",
                                     "",
                                     "https://creativecommons.org/publicdomain/zero/1.0/",
                                     "https://creativecommons.org/licenses/by/3.0/",
-                                    "https://creativecommons.org/licenses/by-nc/3.0/"], 160, 100, screen, constants.WHITE, 25)
+                                    "https://creativecommons.org/licenses/by-nc/3.0/"], 160, 30, screen, constants.WHITE, 25)
 
 
 class GetReadyScene(generic_scene.GenericScene):
