@@ -4,7 +4,7 @@ and runs the main game loop. """
 # Asteroid Attack - a scrolling space shooter
 # Thomas Burke - thomasmns.com
 # 14/11/2016
-# V1.2 (in dev) 14/01/2017
+# V1.3 19/01/2017
 
 # Importing required modules
 # Pygame
@@ -29,7 +29,7 @@ def main():
 
     # Set up the main game loop
     clock = pygame.time.Clock()
-    active_scene = ui_scenes.TitleScene()
+    active_scene = ui_scenes.OpeningScene()
 
     # Main game loop
     while active_scene is not None:

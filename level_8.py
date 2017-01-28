@@ -12,7 +12,7 @@ import boss_2
 
 class LevelEight(game_scene.GameScene):
     """ Class for level 8. """
-    def __init__(self, ship, ship_2, score, lives):
+    def __init__(self, settings, ship, ship_2, score, lives):
         self.player = ship
         self.player_2 = ship_2
         super().__init__(pygame.image.load('assets/purple_stars.png').convert())
@@ -75,11 +75,11 @@ class LevelEight(game_scene.GameScene):
             players = "multi"
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2)
+            self.next_scene = ui_scenes.GameOverScene(self.score, "lose", self.player_2, self.settings)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.LevelCompleteScene(self.player, self.player_2, self.score, self.lives,
-                                                           boss_2.BossTwo)
+            self.next_scene = ui_scenes.LevelCompleteScene(self.settings, self.player, self.player_2, self.score,
+                                                           self.lives, boss_2.BossTwo)
 
     def draw(self, screen):
         super().draw(screen)

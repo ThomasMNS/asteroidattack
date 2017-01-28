@@ -51,9 +51,6 @@ class RectangleHoverButton(Button):
         super().__init__(text, width, height, x, y, text_size)
         self.color = color
         self.hover_color = hover_color
-        self.sound = pygame.mixer.Sound('music/button.ogg')
-        self.sound.set_volume(0.1)
-        self.sound_played = False
 
     def draw_button(self, screen):
         if self.mouse_over is True:
@@ -65,12 +62,6 @@ class RectangleHoverButton(Button):
 
     def mouse_on_button(self, mouse_pos):
         super().mouse_on_button(mouse_pos)
-        if self.mouse_over is True and self.sound_played is False:
-            self.sound.play()
-            self.sound_played = True
-        if self.mouse_over is False:
-            self.sound_played = False
-
 
 class Popup:
     """ A coloured box that displays some text. Positioned at a given XY location, unless
@@ -315,3 +306,86 @@ class HealthBar:
         x = self.x + ((self.width / 2) - (health_render_rect.width / 2))
         y = self.y + ((self.height / 2) - (health_render_rect.height / 2))
         screen.blit(health_render, (x, y))
+
+
+class Slider:
+    """ A UI control that allows users to select a number by dragging the mouse. """
+    def __init__(self, x, y, width, min_value, max_value, starting_value):
+        # Arguments to attributes
+        self.x = x
+        self.y = y
+        self.width = width
+        self.min_value = min_value
+        self.max_value = max_value
+        self.value = starting_value
+
+        self.thickness = 5
+
+        # Font
+        self.font = pygame.font.Font(None, 25)
+
+        # What percentage of the bar is the starting value
+        self.value_percentage = (self.value - self.min_value) / (self.max_value - self.min_value)
+        # What does this equate to in pixels
+        self.value_to_draw = self.value_percentage * self.width
+
+        # Location of the grabbable. Take 2 pixels off so that it is drawn slightly left, and the value selected
+        # is in the middle of the grabbable
+        self.grabbable_rect = [self.x + self.value_to_draw - 2, self.y - 6, 5, 17]
+        self.mouse_over_grabbable = False
+        self.grabbable_clicked = False
+        self.grabbable_color = constants.LIGHT_GREY_2
+
+        self.mouse_x_on_click = None
+
+    def handle_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.mouse_over_grabbable is True:
+                self.grabbable_clicked = True
+                self.mouse_x_on_click = pygame.mouse.get_pos()[0]
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.grabbable_clicked = False
+
+    def update(self):
+        # Check if the mouse is over the grabbable
+        if (self.grabbable_rect[0] < pygame.mouse.get_pos()[0] < self.grabbable_rect[0] + self.grabbable_rect[2]) and (self.grabbable_rect[1] < pygame.mouse.get_pos()[1] < self.grabbable_rect[1] + self.grabbable_rect[3]):
+            self.mouse_over_grabbable = True
+        else:
+            self.mouse_over_grabbable = False
+
+        # Change colour of grabbable when it has been clicked
+        if self.grabbable_clicked is True:
+            self.grabbable_color = constants.LIGHTER_GREY
+        else:
+            self.grabbable_color = constants.LIGHT_GREY_2
+
+        # Every tick, find out how far the mouse moves, move the grabbable by the same amount
+        if self.mouse_x_on_click is not None and self.grabbable_clicked is True:
+            grabbable_movement = pygame.mouse.get_pos()[0] - self.mouse_x_on_click
+            new_grabbable_pos = self.grabbable_rect[0] + grabbable_movement
+            # Keep grabbale within the line
+            if new_grabbable_pos < self.x - 2:
+                new_grabbable_pos = self.x - 2
+            elif new_grabbable_pos + self.grabbable_rect[2] > self.x + self.width + 3:
+                new_grabbable_pos = self.x + self.width - self.grabbable_rect[2] + 3
+            self.grabbable_rect[0] = new_grabbable_pos
+            self.mouse_x_on_click = pygame.mouse.get_pos()[0]
+            grabbable_movement = 0
+
+        # How many pixels along the bar is the centre of the grabbable
+        self.bar_value = self.grabbable_rect[0] + 2
+        # What does this equate to in percent
+        self.bar_percentage = (self.bar_value - self.x) / self.width
+        # What value is selected
+        self.value = ((self.max_value - self.min_value) / 100) * (self.bar_percentage * 100) + self.min_value
+
+    def draw(self, screen):
+        # Draw line
+        pygame.draw.rect(screen, constants.LIGHT_GREY, (self.x, self.y, self.width, self.thickness))
+
+        # Draw grabbable rectangle
+        pygame.draw.rect(screen, self.grabbable_color, self.grabbable_rect)
+
+        # Draw text
+        value_render = self.font.render(str(round(self.value)), True, constants.WHITE)
+        screen.blit(value_render, (self.x + self.width + 10, self.y - 5))

@@ -16,8 +16,11 @@ import ui_scenes
 class TrainingScene(game_scene.GameScene):
     """ A scene for the 'training' game mode. Inherits from the game_scene but with some attributs overriden
     to allow for player chosen numbers of enemies, powerups etc. """
-    def __init__(self, ship, training_choices):
+    def __init__(self, settings, ship, ship_2, training_choices):
+        self.settings = settings
         self.player = ship
+        self.player_2 = ship_2
+        self.score = 0
         super().__init__(pygame.image.load('assets/training_background.png').convert())
         self.next_scene = self
         # Getting the user choices
@@ -100,10 +103,10 @@ class TrainingScene(game_scene.GameScene):
                                            argument=self)
 
         if self.timer == 5000:
-            self.next_scene = ui_scenes.TrainingGameOverScene(self.score, "win")
+            self.next_scene = ui_scenes.TrainingGameOverScene(self.score, "win", self.settings)
 
         if self.lives == 0:
-            self.next_scene = ui_scenes.TrainingGameOverScene(self.score, "lose")
+            self.next_scene = ui_scenes.TrainingGameOverScene(self.score, "lose", self.settings)
 
     def draw(self, screen):
         super().draw(screen)

@@ -21,6 +21,12 @@ Requires Python 3 and Pygame. Creates and edits a highscores file (asteroid-atta
 
 # Change log
 
+* 28/01/2017
+  * Added music for menus and titles!
+  * New settings screen. This currently allows you to change the volume of both sound effects and background music.
+  * New screen showing developer logo on startup. Don't worry, this can be skipped with a mouse or button click.
+  * Fixed a bug that stopped training mode working.
+  * Buttons now make a sound on click, rather than on mouseover.
 * 19/01/2017
   * Boss battles have arrived! Test yourself in battle against two bosses with various unique and increasingly difficult mechanics. Boss battles occur mid way through the campaign and in the final level.
   * Game no longer crashes when adding a new highscore.

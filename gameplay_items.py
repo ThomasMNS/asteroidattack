@@ -38,15 +38,15 @@ class PlayerShip(pygame.sprite.Sprite):
 
         self.alert_played = False
         self.alarm = pygame.mixer.Sound('music/alarm.wav')
-        self.alarm.set_volume(0.5)
+
 
         # Powerup sound
-        self.powerup_sound = pygame.mixer.Sound('music/powerup.wav')
-        self.powerup_sound.set_volume(0.5)
+        self.powerup_sound = pygame.mixer.Sound('music/bonus.wav')
+
 
         # Star sound
-        self.star_sound = pygame.mixer.Sound('music/coin.wav')
-        self.star_sound.set_volume(0.2)
+        self.star_sound = pygame.mixer.Sound('music/coin.ogg')
+
 
         self.health = 100
 
@@ -55,6 +55,11 @@ class PlayerShip(pygame.sprite.Sprite):
         self.rect.y = y
 
     def update(self):
+        if self.game_scene is not None:
+            self.alarm.set_volume(self.game_scene.settings['sound_volume'] / 100)
+            self.powerup_sound.set_volume(self.game_scene.settings['sound_volume'] / 100)
+            self.star_sound.set_volume(self.game_scene.settings['sound_volume'] / 100)
+
         self.rect.x += self.x_speed
         self.rect.y += self.y_speed
 
@@ -134,7 +139,7 @@ class PlayerShip(pygame.sprite.Sprite):
         # Death
         if self.health <= 0:
             self.game_scene.lives -= 1
-            self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+            self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
             scene_tools.death_scene_reset([self.game_scene.asteroids, self.game_scene.pups,
                                            self.game_scene.collectible_stars], self, self.game_scene.player_2)
             self.health = 100
@@ -202,6 +207,7 @@ class Laser(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.sound = pygame.mixer.Sound('music/laser.ogg')
+        self.sound.set_volume(self.game_scene.settings['sound_volume'] / 100)
         self.sound.play()
 
         self.health_decrease = 20
@@ -222,7 +228,7 @@ class Laser(pygame.sprite.Sprite):
                 self.game_scene.score += enemy.score_increase
 
     def collision(self):
-        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
         self.kill()
 
 
@@ -254,7 +260,7 @@ class BrownAsteroid(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, 1024)
 
     def collision(self):
-        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
         self.kill()
 
 
@@ -286,7 +292,7 @@ class GreyAsteroid(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, 1024)
 
     def collision(self):
-        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
         self.kill()
 
 
@@ -314,7 +320,7 @@ class MedAsteroid(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, 1024)
 
     def collision(self):
-        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
         self.kill()
 
 
@@ -343,7 +349,7 @@ class FragmentingAsteroid(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, 1024)
 
     def collision(self):
-        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
         self.kill()
         ast1 = FragmentedAsteroid(self.game_scene)
         ast1.rect.x = self.rect.x + (self.rect.width / 2 - ast1.rect.width / 2) + 40
@@ -381,7 +387,7 @@ class FragmentedAsteroid(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, 1024)
 
     def collision(self):
-        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
         self.kill()
 
 
@@ -408,7 +414,7 @@ class StrongAsteroid(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, 1024)
 
     def collision(self):
-        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
         self.health -= 1
         if self.health == 2:
             y = self.rect.y
@@ -534,6 +540,7 @@ class AlienLaser(pygame.sprite.Sprite):
         self.health_decrease = 30
 
         self.laser_sound = pygame.mixer.Sound('music/laser_alien.ogg')
+        self.laser_sound.set_volume(self.game_scene.settings['sound_volume'] / 100)
         self.laser_sound.play()
 
         # Angle and rotation
@@ -559,7 +566,7 @@ class AlienLaser(pygame.sprite.Sprite):
             self.kill()
 
     def collision(self):
-        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.x, self.rect.y, self.game_scene.images, self.game_scene))
         self.kill()
 
 
@@ -823,7 +830,8 @@ class Boss(pygame.sprite.Sprite):
 
         if self.health <= 0:
             self.kill()
-            self.game_scene.all_sprites.add(Explosion(self.rect.center[0], self.rect.center[1], self.game_scene.images))
+            self.game_scene.all_sprites.add(Explosion(self.rect.center[0], self.rect.center[1], self.game_scene.images,
+                                                      self.game_scene))
             for laser in self.lasers:
                 laser.kill()
 
@@ -835,7 +843,8 @@ class Boss(pygame.sprite.Sprite):
 
     def collision(self):
         """ Called if there is a collision with a player laser. """
-        self.game_scene.all_sprites.add(Explosion(self.rect.center[0], self.rect.center[1], self.game_scene.images))
+        self.game_scene.all_sprites.add(Explosion(self.rect.center[0], self.rect.center[1], self.game_scene.images,
+                                                  self.game_scene))
         self.health -= 10
 
     def reset(self):
@@ -852,8 +861,9 @@ class Boss(pygame.sprite.Sprite):
 
 class Explosion(pygame.sprite.Sprite):
     """ An explosion animation. """
-    def __init__(self, x, y, images):
+    def __init__(self, x, y, images, game_scene):
         super().__init__()
+        self.game_scene = game_scene
         self.images = images
         self.image = self.images[1]
         self.rect = self.image.get_rect()
@@ -862,7 +872,7 @@ class Explosion(pygame.sprite.Sprite):
         self.index = 0
 
         explosion = pygame.mixer.Sound('music/explosion.wav')
-        explosion.set_volume(0.2)
+        explosion.set_volume(self.game_scene.settings['sound_volume'] / 100)
         explosion.play()
 
     def update(self):
