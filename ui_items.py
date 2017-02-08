@@ -389,3 +389,125 @@ class Slider:
         # Draw text
         value_render = self.font.render(str(round(self.value)), True, constants.WHITE)
         screen.blit(value_render, (self.x + self.width + 10, self.y - 5))
+
+
+class DropDown:
+    def __init__(self, x, y, options, selected_option):
+        # Attributes//Ye
+        # Position
+        self.x = x
+        self.y = y
+        # Options
+        self.options = options
+        self.selected_option = selected_option
+        # Font
+        self.font_size = 23
+        self.font = pygame.font.Font(None, self.font_size)
+        # Colors
+        self.color = constants.LIGHT_GREY
+        # Status
+        self.mouse_over = False
+        self.drop_down_visible = False
+        # The padding between options in the drop down list
+        self.drop_down_padding = 20
+
+        # Render all the text
+        self.renders = []
+        # Create a list to store whether the mouse is over the text
+        self.options_mouse_over = []
+        # Go through each string in the options and create a render. Add it to the renders list
+        for option in self.options:
+            render = self.font.render(option, True, constants.WHITE)
+            self.renders.append(render)
+            self.options_mouse_over.append(False)
+
+        # Pygame gives all text renders the same height, regardless of whether there are tall or short characters
+        # Take the first render, and find out this height
+        text_rect = self.renders[0].get_rect()
+        self.text_height = text_rect.height
+        # The text will have different widths. Find the greatest width
+        self.text_width = 0
+        for render in self.renders:
+            rect = render.get_rect()
+            width = rect.width
+            if width > self.text_width:
+                self.text_width = width
+
+        # + 20 for padding around text, +30 to extend box around drop down arrow
+        self.height = self.text_height + 20
+        self.width = self.text_width + 50
+
+        # Create a list of rects showing locations of boxes for each option
+        self.y_tracker = self.y + self.height
+        self.drop_down_rects = []
+        for render in self.renders:
+            rect = [self.x, self.y_tracker, self.width, self.text_height + self.drop_down_padding]
+            self.drop_down_rects.append(rect)
+            self.y_tracker += self.text_height + self.drop_down_padding
+
+        # Calculating the drop down arrow location
+        # Arrow should start after the text and padding
+        self.triangle_x_offset = self.width - 30
+        # In the middle of the box
+        self.triangle_y_offset = (self.height / 2) - (15 / 2)
+
+        # Rect for the selected option box
+        self.rect = (self.x, self.y, self.width, self.height)
+
+    def handle_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and self.mouse_over is True and self.drop_down_visible is False:
+            self.drop_down_visible = True
+        elif event.type == pygame.MOUSEBUTTONDOWN and self.mouse_over is True and self.drop_down_visible is True:
+            self.drop_down_visible = False
+        if event.type == pygame.MOUSEBUTTONDOWN and self.drop_down_visible is True:
+            counter = 0
+            for rect_mouse_over in self.options_mouse_over:
+                if rect_mouse_over is True:
+                    self.selected_option = counter
+                counter += 1
+        if event.type == pygame.MOUSEBUTTONDOWN and self.mouse_over is False:
+            self.drop_down_visible = False
+
+    def update(self):
+        if (self.rect[0] < pygame.mouse.get_pos()[0] <= (self.rect[0] + self.rect[2]) and self.rect[1]
+                < pygame.mouse.get_pos()[1] <= (self.rect[1] + self.rect[3])):
+            self.mouse_over = True
+            self.color = constants.DARK_GREY
+        else:
+            self.mouse_over = False
+            self.color = constants.LIGHT_GREY
+
+        counter = 0
+        for rect in self.drop_down_rects:
+            if (rect[0] < pygame.mouse.get_pos()[0] <= (rect[0] + rect[2]) and rect[1] < pygame.mouse.get_pos()[1]
+                    <= (rect[1] + rect[3])):
+                self.options_mouse_over[counter] = True
+            else:
+                self.options_mouse_over[counter] = False
+            counter += 1
+
+    def draw(self, screen):
+        # Draw the selected option box
+        pygame.draw.rect(screen, self.color, self.rect)
+        # Draw the arrow
+        pygame.draw.polygon(screen, constants.LIGHTER_GREY,
+                            ((self.x + self.triangle_x_offset, self.y + self.triangle_y_offset),
+                             (self.x + 10 + self.triangle_x_offset, self.y + 15 + self.triangle_y_offset),
+                             (self.x + 20 + self.triangle_x_offset, self.y + self.triangle_y_offset)))
+        # Draw the selected option
+        screen.blit(self.renders[self.selected_option], (self.x + 10, self.y + 10))
+        # If drop down is visible, draw the drop down box
+        if self.drop_down_visible is True:
+            counter = 0
+            for rect in self.drop_down_rects:
+                if self.options_mouse_over[counter] is True:
+                    color = constants.LIGHTER_GREY
+                else:
+                    color = constants.LIGHT_GREY_2
+                pygame.draw.rect(screen, color, rect)
+                counter += 1
+            counter = 0
+            for render in self.renders:
+                rect = self.drop_down_rects[counter]
+                screen.blit(render, (rect[0] + 10, rect[1] + self.drop_down_padding / 2))
+                counter += 1
